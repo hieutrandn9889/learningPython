@@ -39,6 +39,6 @@ def main():
     access_carlos_account(s, url)
 
 
-proxies = {'http': 'http://127.0.0.1:8080', 'https': 'https://127.0.0.1:8080'}
+proxies = {'http': '127.0.0.1:8080', 'https': '127.0.0.1:8080'}
 if __name__ == '__main__':
     main()
