@@ -9,7 +9,7 @@ class Mac_changer:
     def __init__(self):
         self.MAC = ""
 
-    def get_MAC(self, iface):
+    def get_MAC_Address(self, iface):
         output = subprocess.run(['ifconfig', iface],
                                 shell=False, capture_output=True)
 
