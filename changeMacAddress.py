@@ -35,8 +35,10 @@ class Mac_changer:
         # ifconfig eth0 hw ether 00:11:22:33:44:55
         output = subprocess.run(['ifconfig', iface, "hw", "ether", new_mac],
                                 shell=False, capture_output=True)
+        print(output.stderr.decode('utf-8'))
         # ifconfig eth0 up
         output = subprocess.run(['ifconfig', iface, "up"],
                                 shell=False, capture_output=True)
+        print(output.stderr.decode('utf-8'))
         print("[+] Updated MAC address is", self.get_MAC_Address(iface))
         return self.get_MAC_Address(iface)
