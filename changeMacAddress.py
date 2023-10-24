@@ -14,13 +14,16 @@ class Mac_changer:
                                 shell=False, capture_output=True)
 
         cmd_result = output.stdout.decode('utf-8')
+
+        # ifconfig eth0
         print(cmd_result)
 
+        # format eth0 address
         pattern = r'ether\s[\da-z]{2}:[\da-z]{2}:[\da-z]{2}:[\da-z]{2}:[\da-z]{2}'
         regex = re.compile(pattern)
         ans = regex.search(cmd_result)
-        print(ans)
 
+        # filter address
         current_mac = ans.group().split(" ")[1]
         self.MAC = current_mac
         return current_mac
