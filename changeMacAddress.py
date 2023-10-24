@@ -27,3 +27,24 @@ class Mac_changer:
         current_mac = ans.group().split(" ")[1]
         self.MAC = current_mac
         return current_mac
+
+    def change_MAC_Address(self, iface, new_mac):
+
+        # ifconfig eth0 down
+        print("[+] Current MAC address is", self.get_MAC_Address(iface))
+        output = subprocess.run(['ifconfig', iface, "down"],
+                                shell=False, capture_output=True)
+        print(output.stderr.decode('utf-8'))
+
+        # ifconfig eth0 hw ether 00:11:22:33:44:55
+        output = subprocess.run(['ifconfig', iface, "hw", "ether", new_mac],
+                                shell=False, capture_output=True)
+        print(output.stderr.decode('utf-8'))
+
+        # ifconfig eth0 up
+        output = subprocess.run(['ifconfig', iface, "down"],
+                                shell=False, capture_output=True)
+        print(output.stderr.decode('utf-8'))
+
+        print("[+] Updated MAC address is", self.get_MAC_Address(iface))
+        return self.get_MAC_Address(iface)
