@@ -15,6 +15,9 @@ class Mac_changer:
 
         cmd_result = output.stdout.decode('utf-8')
 
+        # ifconfig eth0
+        print(cmd_result)
+
         # format eth0 address
         pattern = r'ether\s[\da-z]{2}:[\da-z]{2}:[\da-z]{2}:[\da-z]{2}:[\da-z]{2}'
         regex = re.compile(pattern)
