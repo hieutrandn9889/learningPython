@@ -19,6 +19,7 @@ class Mac_changer:
         pattern = r'ether\s[\da-z]{2}:[\da-z]{2}:[\da-z]{2}:[\da-z]{2}:[\da-z]{2}'
         regex = re.compile(pattern)
         ans = regex.search(cmd_result)
+        print(ans)
 
         current_mac = ans.group().split(" ")[1]
         self.MAC = current_mac
