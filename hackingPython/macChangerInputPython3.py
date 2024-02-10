@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 import subprocess
 
-interface = input("interface >")
-newMac = input("new MAC >")
+interface = input("interface > ")
+newMac = input("new MAC > ")
 
 print("[+] Changing MAC address for " + interface + " to " + newMac)
 
