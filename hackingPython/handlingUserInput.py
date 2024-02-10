@@ -12,9 +12,9 @@ parser.add_option("-m", "--mac", dest="newMac",
 interface = options.interface
 newMac = options.newMac
 
-print("[+] Changing MAC address for ", interface, " to ", newMac)
+print("[+] Changing MAC address for", interface, "to", newMac)
 
 subprocess.call(["ifconfig", interface, "down"])
-subprocess.call(["ifconfig", interface, "hw ether ", newMac])
+subprocess.call(["ifconfig", interface, "hw", "ether ", newMac])
 subprocess.call(["ifconfig", interface, "up"])
 subprocess.call(["ifconfig", interface])
