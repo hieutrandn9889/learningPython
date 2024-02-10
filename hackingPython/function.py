@@ -6,7 +6,7 @@ import optparse
 def changeMac(interface, newMac):
     print("[+] Changing MAC address for " + interface + " to " + newMac)
     subprocess.call(["ifconfig", interface, "down"])
-    subprocess.call(["ifconfig", interface, "hw", "ether ", newMac])
+    subprocess.call(["ifconfig", interface, "hw", "ether", newMac])
     subprocess.call(["ifconfig", interface, "up"])
 
 
