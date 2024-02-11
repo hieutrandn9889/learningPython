@@ -28,4 +28,14 @@ def changeMac(interface, newMac):
 
 
 options = getArguments()
-changeMac(options.interface, options.newMac)
+# changeMac(options.interface, options.newMac)
+
+ifconfigResult = subprocess.check_output(["ifconfig", options.interface])
+print("ifconfig result: " + ifconfigResult)
+macAddressSearchResult = re.search(
+    r"\w\W:\w\W:\w\W:\w\W:\w\W:\w\W:", ifconfigResult)
+
+if macAddressSearchResult:
+    print(macAddressSearchResult.group(0))
+else:
+    print("[-] Could not read MAC address")
