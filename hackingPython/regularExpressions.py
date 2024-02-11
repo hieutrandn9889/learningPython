@@ -33,7 +33,7 @@ options = getArguments()
 ifconfigResult = subprocess.check_output(
     ["ifconfig", options.interface]).decode("utf-8")
 
-print("ifconfigResult" + ifconfigResult)
+print("ifconfigResult " + ifconfigResult)
 macAddressSearchResult = re.search(
     r"\w\W:\w\W:\w\W:\w\W:\w\W:\w\W:", ifconfigResult)
 
