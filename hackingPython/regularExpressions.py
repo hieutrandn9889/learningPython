@@ -31,7 +31,7 @@ options = getArguments()
 # changeMac(options.interface, options.newMac)
 
 ifconfigResult = subprocess.check_output(["ifconfig", options.interface])
-# print("ifconfig result: " + ifconfigResult)
+print(ifconfigResult)
 macAddressSearchResult = re.search(
     r"\w\W:\w\W:\w\W:\w\W:\w\W:\w\W:", ifconfigResult)
 
