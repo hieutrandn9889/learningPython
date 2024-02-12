@@ -32,12 +32,12 @@ options = getArguments()
 # .decode("utf-8") => convert byte  to string
 
 
-ifconfig_result = subprocess.check_output(
+ifconfigResult = subprocess.check_output(
     ["ifconfig", options.interface]).decode("utf-8")
-print(ifconfig_result)
+print(ifconfigResult)
 # get address eth0
 macAddressSearchResult = re.search(
-    r"\w\w:\w\w:\w\w:\w\w:\w\w:\w\w", ifconfig_result)
+    r"\w\w:\w\w:\w\w:\w\w:\w\w:\w\w", ifconfigResult)
 if macAddressSearchResult:
     print(macAddressSearchResult.group(0))
 else:
