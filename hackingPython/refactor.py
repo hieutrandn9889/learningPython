@@ -45,7 +45,9 @@ options = getArguments()
 currentMac = getCurrentMac(options.interface)
 print("Current Mac: " + str(currentMac))
 
-changeMac(options.interface, options.newMac)
+# changeMac(options.interface, options.newMac)
+
+currentMac = getCurrentMac(options.interface)
 if currentMac == getCurrentMac(options.newMac):
     print("[+] MAC address was successfully changed to " + currentMac)
 else:
