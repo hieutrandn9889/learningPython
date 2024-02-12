@@ -30,8 +30,6 @@ def changeMac(interface, newMac):
 options = getArguments()
 # changeMac(options.interface, options.newMac)
 # .decode("utf-8") => convert byte  to string
-
-
 ifconfigResult = subprocess.check_output(
     ["ifconfig", options.interface]).decode("utf-8")
 print(ifconfigResult)
@@ -42,16 +40,3 @@ if macAddressSearchResult:
     print(macAddressSearchResult.group(0))
 else:
     print("[-] Could not read MAC address.")
-
-
-# ifconfigResult = subprocess.check_output(
-#     ["ifconfig", options.interface]).decode("utf-8")
-
-# print("ifconfigResult " + ifconfigResult)
-# macAddressSearchResult = re.search(
-#     r"\w\W:\w\W:\w\W:\w\W:\w\W:\w\W:", ifconfigResult)
-# print("macAddressSearchResult" + macAddressSearchResult)
-# if macAddressSearchResult:
-#     print(macAddressSearchResult.group(0))
-# else:
-#     print("[-] Could not read MAC address")
