@@ -36,7 +36,7 @@ ifconfigResult = subprocess.check_output(
 print("ifconfigResult " + ifconfigResult)
 macAddressSearchResult = re.search(
     r"\w\W:\w\W:\w\W:\w\W:\w\W:\w\W:", ifconfigResult)
-
+print("macAddressSearchResult" + macAddressSearchResult)
 if macAddressSearchResult:
     print(macAddressSearchResult.group(0))
 else:
