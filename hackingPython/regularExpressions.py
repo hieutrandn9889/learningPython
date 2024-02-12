@@ -33,7 +33,7 @@ options = getArguments()
 
 
 ifconfig_result = subprocess.check_output(
-    ["ifconfig", interface]).decode("utf-8")
+    ["ifconfig", options.interface]).decode("utf-8")
 print(ifconfig_result)
 # get address eth0
 macAddressSearchResult = re.search(
