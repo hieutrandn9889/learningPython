@@ -31,7 +31,7 @@ def getCurrentMac(interface):
     # .decode("utf-8") => convert byte  to string
     ifconfigResult = subprocess.check_output(
         ["ifconfig", options.interface]).decode("utf-8")
-    print("ifconfigResult" + ifconfigResult)
+    # print("ifconfigResult " + ifconfigResult)
     # get address eth0
     macAddressSearchResult = re.search(
         r"\w\w:\w\w:\w\w:\w\w:\w\w:\w\w", ifconfigResult)
@@ -47,7 +47,7 @@ print("Current Mac: " + str(currentMac))
 
 # changeMac(options.interface, options.newMac)
 
-currentMac = getCurrentMac(options.interface)
+# currentMac = getCurrentMac(options.interface)
 if currentMac == getCurrentMac(options.newMac):
     print("[+] MAC address was successfully changed to " + currentMac)
 else:
