@@ -31,7 +31,7 @@ def getCurrentMac(interface):
     # .decode("utf-8") => convert byte  to string
     ifconfigResult = subprocess.check_output(
         ["ifconfig", options.interface]).decode("utf-8")
-    # print("ifconfigResult " + ifconfigResult)
+    print("ifconfigResult " + ifconfigResult)
     # get address eth0
     macAddressSearchResult = re.search(
         r"\w\w:\w\w:\w\w:\w\w:\w\w:\w\w", ifconfigResult)
