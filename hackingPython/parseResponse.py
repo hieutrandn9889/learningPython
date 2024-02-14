@@ -12,10 +12,10 @@ def scan(ip):
     # answeredList = scapy.srp(arpRequestBroadcast, timeout=1)[0] ==> [0] is answered
     # answeredList = scapy.srp(arpRequestBroadcast, timeout=1)[1] ==> [1] is unanswered
     answeredList = scapy.srp(arpRequestBroadcast, timeout=1)[0]
-    print("answeredList " + str(answeredList))
     for element in answeredList:
-        print(element[0].psrc)
-        print(element[0].hwsrc)
+        # print(element[0].psrc)
+        # print(element[0].hwsrc)
+        print(element)
         print("----------------------------------------------------------------")
 
 
