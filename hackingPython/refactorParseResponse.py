@@ -25,7 +25,7 @@ def scan(ip):
 
 
 def printResult(resultList):
-    print("resultList" + resultList)
+    print("resultList", resultList)
     # resultList is array
     print("IP\t\t\tMAC Address\n-------------------------------------------")
     for client in resultList:
