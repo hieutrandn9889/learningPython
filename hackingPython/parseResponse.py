@@ -11,14 +11,14 @@ def scan(ip):
 
     # answeredList = scapy.srp(arpRequestBroadcast, timeout=1)[0] ==> [0] is answered
     # answeredList = scapy.srp(arpRequestBroadcast, timeout=1)[1] ==> [1] is unanswered
-    answeredList = scapy.srp(arpRequestBroadcast, timeout=1)[0]
+    # verbose = False ==> remove Begin ...
+    answeredList = scapy.srp(arpRequestBroadcast, timeout=1, verbose=False)[0]
 
     # with element[0] get a default answer 10.211.55.3
     # with element[1] get a list answer 10.211.55.1 and 10.211.55.2
     for element in answeredList:
-        print(element[1].psrc)
-        print(element[1].hwsrc)
-        print("----------------------------------------------------------------")
+        print("IP\t\t\tMAC Address\n-------------------------------------------")
+        print(element[1].psrc + "\t\t" + element[1].hwsrc)
 
 
 scan("10.211.55.1/24")
