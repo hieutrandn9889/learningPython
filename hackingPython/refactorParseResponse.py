@@ -29,7 +29,7 @@ def printResult(resultList):
     print("IP\t\t\tMAC Address\n-------------------------------------------")
     for client in resultList:
         # client["ip"] and client["mac"] with ip, mac are key
-        print(client["ip"] + "\t\t" + client["mac"])
+        print(client[0]["ip"] + "\t\t" + client[1]["mac"])
 
 
 scanResult = scan("10.211.55.1/24")
