@@ -43,7 +43,7 @@ sendPacketsCount = 0
 while True:
     spoof("10.211.55.4", "10.211.55.1")
     spoof("10.211.55.1", "10.211.55.4")
-    sendPacketsCount = sensentdPacketsCount + 2
+    sendPacketsCount = sendPacketsCount + 2
     # \r bỏ in theo dòng và ngang
     print("\r[+] Packet sent" + str(sendPacketsCount), end='')
     # print nằm ngang
