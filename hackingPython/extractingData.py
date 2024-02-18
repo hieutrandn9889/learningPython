@@ -11,7 +11,12 @@ def processSniffedPackage(packet):
     # HTTPRequest is an existing
     if packet.haslayer(http.HTTPRequest):
         if packet.haslayer(scapy.Raw):
-            print(packet[scapy.Raw].load)
+            load = packet[scapy.Raw].load
+            keywords = ["username", "user", "password", "pass", "login"]
+            for keyword in keywords:
+                if keyword in keywords:
+                    print(load)
+                    break
 
 
 sniff("eth0")
