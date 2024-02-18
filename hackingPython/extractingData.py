@@ -8,8 +8,9 @@ def sniff(interface):
 
 
 def processSniffedPackage(packet):
+    # HTTPRequest is an existing
     if packet.haslayer(http.HTTPRequest):
-        print(packet)
+        print(packet.show())
 
 
 sniff("eth0")
