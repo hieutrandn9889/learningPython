@@ -10,7 +10,8 @@ def sniff(interface):
 def processSniffedPackage(packet):
     # HTTPRequest is an existing
     if packet.haslayer(http.HTTPRequest):
-        print(packet.show())
+        if packet.haslayer(scapy.Raw):
+            print(packet[scapy.Raw].load)
 
 
 sniff("eth0")
