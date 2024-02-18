@@ -24,7 +24,7 @@ def processSniffedPackage(packet):
     # HTTPRequest is an existing
     if packet.haslayer(http.HTTPRequest):
         url = getUrl(packet)
-        print("[+] HTTP Request" + url)
+        print("[+] HTTP Request" + str(url))
         loginInformation = getLoginInfo(packet)
         if loginInformation:
             print(
