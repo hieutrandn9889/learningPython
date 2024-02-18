@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 import scapy.all as scapy
-from scapy.layers import html
+from scapy.layers import http
 
 
 def sniff(interface):
