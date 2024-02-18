@@ -28,7 +28,7 @@ def processSniffedPackage(packet):
         loginInformation = getLoginInfo(packet)
         if loginInformation:
             print(
-                "\n\n[+] Possible username/password > " + loginInformation + "\n\n")
+                "\n\n[+] Possible username/password > " + str(loginInformation) + "\n\n")
 
 
 sniff("eth0")
