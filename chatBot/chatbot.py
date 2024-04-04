@@ -6,7 +6,7 @@ import pyautogui as py
 
 characters = string.ascii_letters
 numbers = string.digits
-length = input("Length of char or nums: ")
+length = input("Length of char or nums1 : ")
 number = input("No of messages: ")
 choice = input("Characters or numbers: ")
 
