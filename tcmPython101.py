@@ -22,8 +22,9 @@ print(sys.argv)
 
 if len(sys.argv) !=3:
     print("[X] To run {} enter a username and password".format(sys.argv[0]))
-    sys.exit(1) #Exit the program with an error code
+    sys.exit(5) #Exit the program with an error code
     username = sys.argv[1] #Get the username from the command line arguments
     password = sys.argv[2] #Get the password from the command line arguments
     print("[*] Username: {}".format(username)) #Output the username
     print("[*] Password: {}".format(password)) #Output the password
+    sys.exit(0) #Exit the program with a success code
