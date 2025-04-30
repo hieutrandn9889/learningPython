@@ -1,0 +1,10 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('variable/', views.variable, name='variable'),
+    path('counterGETInput/', views.counterGETInput, name='counterGETInput'),
+    path('GETTextarea/', views.GETTextarea, name='GETTextarea'),
+    path('POSTTextarea/', views.POSTTextarea, name='POSTTextarea'),
+]
