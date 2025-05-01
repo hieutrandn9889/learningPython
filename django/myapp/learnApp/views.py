@@ -3,7 +3,10 @@ from django.http import HttpResponse
 
 # Create your views here.
 def index(request):
-    return render(request, 'index.html', {'title': 'Welcome to MyApp'})
+    return render(request, 'index.html')
+
+def static(request):
+    return render(request, 'static.html', {'title': 'Welcome to MyApp'})
 
 def variable(request):
     context = {
