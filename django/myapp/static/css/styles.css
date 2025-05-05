@@ -1,0 +1,104 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to right, #cb11a9, #2575fc); /* Gradient background */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #fff; /* Default text color for better contrast */
+}
+
+.container {
+    max-width: 600px; /* Increased width */
+    background: #fff;
+    padding: 40px 50px; /* Increased padding */
+    border-radius: 15px; /* More rounded corners */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+    color: #333; /* Text color inside the form */
+}
+
+.form-title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px; /* Increased spacing */
+    font-size: 32px; /* Larger font size */
+    font-weight: bold;
+}
+
+/* Form Styles */
+.register-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 20px; /* Increased spacing between fields */
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 8px; /* Increased spacing below labels */
+    display: block;
+    color: #555;
+    font-size: 16px; /* Larger label font size */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 15px; /* Increased padding */
+    border: 1px solid #ccc;
+    border-radius: 8px; /* More rounded corners */
+    font-size: 16px; /* Larger font size */
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Stronger focus effect */
+    outline: none;
+}
+
+/* Button Styles */
+.btn-submit {
+    background-color: #007bff;
+    color: #fff;
+    padding: 15px; /* Increased padding */
+    border: none;
+    border-radius: 8px; /* More rounded corners */
+    font-size: 18px; /* Larger font size */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #66aaf3;
+}
+
+/* Messages */
+.messages {
+    margin-bottom: 20px; /* Increased spacing */
+    text-align: center;
+}
+
+.messages p {
+    padding: 12px; /* Increased padding */
+    border-radius: 8px; /* More rounded corners */
+    font-size: 16px; /* Larger font size */
+}
+
+.messages .error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.messages .success {
+    background-color: #d4edda;
+    color: #155724;
+}
