@@ -3,4 +3,9 @@ from django.http import HttpResponse
 
 # Create your views here.
 def home(request):
-    return render(request, 'home.html')
+    emailObj = {
+        'title': 'Cong ty Hieu Tran',
+        'description': 'Thong bao lich phong van',
+        'date': 'Hom qua'
+    }
+    return render(request, 'home.html', {'emailObj': emailObj})
