@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Index - OnePage Bootstrap Template</title>
+  <title>OnePage</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -52,33 +52,29 @@
         <ul>
           <li><a href="#hero" class="active">Home<br></a></li>
           <li><a href="#about">About</a></li>
-          <li><a href="#services">Services</a></li>
+          <li><a href="#courses">Courses</a></li>
           <li><a href="#portfolio">Portfolio</a></li>
           <li><a href="#team">Team</a></li>
-          <li class="dropdown"><a href="#"><span>Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+          <li><a href="#contact">Contact</a></li>
+          {% if user.is_authenticated %}
+          <li class="dropdown"><a href="#"><span>My Profile</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li><a href="#">Dropdown 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                <ul>
-                  <li><a href="#">Deep Dropdown 1</a></li>
-                  <li><a href="#">Deep Dropdown 2</a></li>
-                  <li><a href="#">Deep Dropdown 3</a></li>
-                  <li><a href="#">Deep Dropdown 4</a></li>
-                  <li><a href="#">Deep Dropdown 5</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Dropdown 2</a></li>
-              <li><a href="#">Dropdown 3</a></li>
-              <li><a href="#">Dropdown 4</a></li>
+              <li><a href="#" class="btn-profile">Profile</a></li>
+              <li><a href="{% url 'logout' %}" class="btn-logout">Logout</a></li>
             </ul>
           </li>
-          <li><a href="#contact">Contact</a></li>
+          {% endif %}
+
+          {% if not user.is_authenticated %}
+          <li><a href="{% url 'login' %}">Login</a></li>
+          {% endif %}
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
-      <a class="btn-getstarted" href="#about">Get Started</a>
-
+      {% if not user.is_authenticated %}
+      <a class="btn-getstarted" href="{% url 'register' %}">Register</a>
+      {% endif %}
     </div>
   </header>
 
@@ -92,7 +88,11 @@
       <div class="container">
         <div class="row justify-content-center" data-aos="zoom-out">
           <div class="col-xl-7 col-lg-9 text-center">
-            <h1>One Page Bootstrap Website Template</h1>
+            {% if user.is_authenticated %}
+              <h1>Welcome, {{ user.username }}!</h1>
+            {% else %}
+              <h1>Welcome to One Page Bootstrap Website Template</h1>
+            {% endif %}
             <p>We are team of talented designers making websites with Bootstrap</p>
           </div>
         </div>
@@ -101,16 +101,16 @@
         </div>
 
         <div class="row gy-4 mt-5">
-          {% for feature in features %}
+          {% for course in courses %}
           <div class="col-md-6 col-lg-3" data-aos="zoom-out" data-aos-delay="100">
             <div class="icon-box">
               <div class="icon"><i class="bi bi-easel"></i></div>
-              <h4 class="title"><a href="">{{ feature.name }}</a></h4>
-              <p class="description">{{ feature.details }}</p>
-              {% if feature.is_true == True %}
-                <span class="badge bg-success">Active</span>
+              <h4 class="title"><a href="">{{ course.name }}</a></h4>
+              <p class="description"><a href="">{{ course.details }}</a></p>
+              {% if course.is_true %}
+                <span class="badge bg-success">Learning</span>
               {% else %}
-                <span class="badge bg-danger">Inactive</span>
+                <span class="badge bg-danger">Not Learning</span>
               {% endif %}
             </div>
           </div><!--End Icon Box -->
@@ -121,12 +121,18 @@
     </section><!-- /Hero Section -->
 
     <!-- About Section -->
+    {% if not user.is_authenticated %}
     <section id="about" class="about section">
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <h2>About Us<br></h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+        <p>
+          MỘT DÒNG CHẢY NĂNG LƯỢNG MỚI BÊN TRONG MÌNH VÀ MỘT CÁI TÊN MỚI RA ĐỜI🍃<br>
+          ✌️Chào bạn! Mình là HẠ UYỂN✌️<br>
+          ❤Trên hành trình tìm về với chính mình, kết nối sâu với linh hồn bên trong chính mình, mình đã trải qua nhiều biến chuyển sâu sắc trong tâm thức.<br>
+          ❤Tiếng gọi từ bên trong thôi thúc mình tìm kiếm một cái tên mới, một tên gọi mang ý nghĩa cho hành trình tiếp theo.<br>
+          </p>
       </div><!-- End Section Title -->
 
       <div class="container">
@@ -135,19 +141,22 @@
 
           <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="100">
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-              magna aliqua.
+              
             </p>
             <ul>
-              <li><i class="bi bi-check2-circle"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></li>
-              <li><i class="bi bi-check2-circle"></i> <span>Duis aute irure dolor in reprehenderit in voluptate velit.</span></li>
-              <li><i class="bi bi-check2-circle"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo</span></li>
+              <li><i class="bi bi-check2-circle"></i> <span>Biết ơn vũ trụ vì đã dẫn dắt mình đến với cái tên đầy ý nghĩa này. Với cái tên mới, mình tự nhủ với bản thân sẽ huân tập, rèn luyện bản thân mỗi ngày để có một cuộc sống ý nghĩa hơn. Mỗi ngày, mình luôn hướng đến sự ôn nhu, khiêm hạ, sửa mình, gieo rắc những lời nói từ ái và chia sẻ kiến thức, lan toả giá trị, gieo những hạt giống thiện lành để giúp đỡ bất kỳ ai tiếp chạm đến mình ❤️</span></li>
+              <li><i class="bi bi-check2-circle"></i> <span>Mỗi ngày, mình luôn hướng đến sự ôn nhu, khiêm hạ, sửa mình, gieo rắc những lời nói từ ái và chia sẻ kiến thức, lan toả giá trị, gieo những hạt giống thiện lành để giúp đỡ bất kỳ ai tiếp chạm đến mình ❤️</span></li>
+              <li><i class="bi bi-check2-circle"></i> <span>Trên hành trình này, mình sẽ trở thành phiên bản tốt nhất của chính mình, mang đến sự bình yên và chữa lành cho những tâm hồn đang lạc lối, bất kì ai đến với mình cũng sẽ cảm thấy tốt hơn, hạnh phúc hơn, năng lượng tích cực, tươi vui hơn mỗi ngày 🙏🏻🙏🏻🙏🏻</span></li>
+              <li><i class="bi bi-check2-circle"></i> <span>Mình sẽ rất vui khi bạn đón nhận và gọi mình với tên “ HẠ UYỂN” 🙏🏻</span></li>
             </ul>
           </div>
 
           <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
-            <p>Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
-            <a href="#" class="read-more"><span>Read More</span><i class="bi bi-arrow-right"></i></a>
+            <p>✌Và "HẠ UYỂN" chính là món quà quý giá mà vũ trụ đã gửi tặng đến mình như một lời nhắn nhủ: <br>
+              * Hạ: Giống như lúa chín trĩu hạt, mang trong mình sự khiêm nhường, cúi mình trước trời đất, thể hiện tinh thần thong dong, ung dung tự tại, hướng đến sự bình an trong tâm hồn.<br>
+              * Uyển: Tựa như dòng nước mềm mại, uyển chuyển, mang đến sự nhẹ nhàng, khéo léo và ôn nhu, thể hiện sự thích nghi, thuận theo quy luật tự nhiên, không cưỡng cầu hay cố chấp.<br>
+              </p>
+            <!-- <a href="#" class="read-more"><span>Read More</span><i class="bi bi-arrow-right"></i></a> -->
           </div>
 
         </div>
@@ -155,6 +164,7 @@
       </div>
 
     </section><!-- /About Section -->
+    {% endif %}
 
     <!-- Stats Section -->
     <section id="stats" class="stats section light-background">
@@ -378,12 +388,12 @@
 
     </section><!-- /Testimonials Section -->
 
-    <!-- Services Section -->
-    <section id="services" class="services section light-background">
+    <!-- Courses Section -->
+    <section id="courses" class="services section light-background">
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Services</h2>
+        <h2>Courses</h2>
         <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
       </div><!-- End Section Title -->
 
@@ -400,7 +410,7 @@
                 <i class="bi bi-activity"></i>
               </div>
               <a href="service-details.html" class="stretched-link">
-                <h3>Nesciunt Mete</h3>
+                <h3>Giọng Nói Chữa Lành</h3>
               </a>
               <p>Provident nihil minus qui consequatur non omnis maiores. Eos accusantium minus dolores iure perferendis tempore et consequatur.</p>
             </div>
@@ -415,7 +425,7 @@
                 <i class="bi bi-broadcast"></i>
               </div>
               <a href="service-details.html" class="stretched-link">
-                <h3>Eosle Commodi</h3>
+                <h3>Giọng Nói Chữa Lành</h3>
               </a>
               <p>Ut autem aut autem non a. Sint sint sit facilis nam iusto sint. Libero corrupti neque eum hic non ut nesciunt dolorem.</p>
             </div>
@@ -430,7 +440,7 @@
                 <i class="bi bi-easel"></i>
               </div>
               <a href="service-details.html" class="stretched-link">
-                <h3>Ledo Markt</h3>
+                <h3>Giọng Nói Chữa Lành</h3>
               </a>
               <p>Ut excepturi voluptatem nisi sed. Quidem fuga consequatur. Minus ea aut. Vel qui id voluptas adipisci eos earum corrupti.</p>
             </div>
@@ -445,7 +455,7 @@
                 <i class="bi bi-bounding-box-circles"></i>
               </div>
               <a href="service-details.html" class="stretched-link">
-                <h3>Asperiores Commodit</h3>
+                <h3>Giọng Nói Chữa Lành</h3>
               </a>
               <p>Non et temporibus minus omnis sed dolor esse consequatur. Cupiditate sed error ea fuga sit provident adipisci neque.</p>
               <a href="service-details.html" class="stretched-link"></a>
@@ -461,7 +471,7 @@
                 <i class="bi bi-calendar4-week icon"></i>
               </div>
               <a href="service-details.html" class="stretched-link">
-                <h3>Velit Doloremque</h3>
+                <h3>Giọng Nói Chữa Lành</h3>
               </a>
               <p>Cumque et suscipit saepe. Est maiores autem enim facilis ut aut ipsam corporis aut. Sed animi at autem alias eius labore.</p>
               <a href="service-details.html" class="stretched-link"></a>
@@ -477,7 +487,7 @@
                 <i class="bi bi-chat-square-text"></i>
               </div>
               <a href="service-details.html" class="stretched-link">
-                <h3>Dolori Architecto</h3>
+                <h3>Giọng Nói Chữa Lành</h3>
               </a>
               <p>Hic molestias ea quibusdam eos. Fugiat enim doloremque aut neque non et debitis iure. Corrupti recusandae ducimus enim.</p>
               <a href="service-details.html" class="stretched-link"></a>
