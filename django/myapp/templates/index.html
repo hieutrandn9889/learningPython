@@ -42,7 +42,7 @@
   <header id="header" class="header d-flex align-items-center sticky-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center">
 
-      <a href="index.html" class="logo d-flex align-items-center me-auto">
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center me-auto">
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <!-- <img src="assets/img/logo.png" alt=""> -->
         <h1 class="sitename">OnePage</h1>
@@ -50,11 +50,13 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="#hero" class="active">Home<br></a></li>
+          <li><a href="{% url 'index' %}" class="active">Home<br></a></li>
+          {% if not user.is_authenticated %}
           <li><a href="#about">About</a></li>
-          <li><a href="#courses">Courses</a></li>
           <li><a href="#portfolio">Portfolio</a></li>
           <li><a href="#team">Team</a></li>
+          {% endif %}
+          <li><a href="#courses">Courses</a></li>
           <li><a href="#contact">Contact</a></li>
           {% if user.is_authenticated %}
           <li class="dropdown"><a href="#"><span>My Profile</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
@@ -100,7 +102,9 @@
           <a href="#about" class="btn-get-started">Get Started</a>
         </div>
 
+        
         <div class="row gy-4 mt-5">
+          {% if user.is_authenticated %}
           {% for course in courses %}
           <div class="col-md-6 col-lg-3" data-aos="zoom-out" data-aos-delay="100">
             <div class="icon-box">              
@@ -115,6 +119,7 @@
             </div>
           </div><!--End Icon Box -->
           {% endfor %}
+          {% endif %}
         </div>
       </div>
 
@@ -164,7 +169,7 @@
       </div>
 
     </section><!-- /About Section -->
-    {% endif %}
+    
 
     <!-- Stats Section -->
     <section id="stats" class="stats section light-background">
@@ -387,7 +392,7 @@
       </div>
 
     </section><!-- /Testimonials Section -->
-
+    {% endif %}
     <!-- Courses Section -->
     <section id="courses" class="services section light-background">
 
@@ -499,7 +504,8 @@
       </div>
 
     </section><!-- /Services Section -->
-
+    
+    {% if not user.is_authenticated %}
     <!-- Call To Action Section -->
     <section id="call-to-action" class="call-to-action section accent-background">
 
@@ -866,7 +872,7 @@
       </div>
 
     </section><!-- /Faq Section -->
-
+    {% endif %}
     <!-- Contact Section -->
     <section id="contact" class="contact section">
 
