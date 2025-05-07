@@ -7,6 +7,9 @@ class Course(models.Model):
     name = models.CharField(max_length=100)
     details = models.TextField(max_length=500)
     link = models.TextField(max_length=500)
+    slug = models.SlugField(unique=True, default='default-slug')
+    def get_absolute_url(self):
+        return reverse('course_detail', kwargs={'slug': self.slug})
 
     def __str__(self):
         return self.name
