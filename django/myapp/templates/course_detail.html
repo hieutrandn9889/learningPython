@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block content %}
 <main class="main">
 
     <!-- Hero Section -->
@@ -27,13 +28,13 @@
           <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="200">
             <h3>
 
-              {% block content %}
+            
                 <div class="container">
                     <h1>{{ course.name }}</h1>
                     <p>{{ course.details }}</p>
                 </div>
 
-                {% endblock %}
+        
             </h3>
             <ul>
               <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></li>
@@ -51,13 +52,8 @@
 
       </div>
 
-    </section><!-- /About Alt Section -->
-
-   
-
+    </section><!-- /About Alt Section -->   
   </main>
-
-
-
+  {% endblock %}
 
 
