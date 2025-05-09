@@ -131,3 +131,18 @@ def logout(request):
 def course_detail(request, slug):
     course = get_object_or_404(Course, slug=slug)
     return render(request, 'course_detail.html', {'course': course})
+
+def about(request):
+    return render(request, 'about.html')
+
+def courses(request):
+    return render(request, 'courses.html')
+
+def portfolio(request):
+    return render(request, 'portfolio.html')
+
+def team(request):
+    return render(request, 'team.html')
+
+def contact(request):
+    return render(request, 'contact.html')
