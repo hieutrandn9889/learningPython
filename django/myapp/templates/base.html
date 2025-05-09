@@ -44,8 +44,8 @@
 
       <a href="{% url 'index' %}" class="logo d-flex align-items-center me-auto">
         <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.png" alt=""> -->
-        <h1 class="sitename">YogaPage</h1>
+        <img src="{% static 'assets/img/logo1.png' %}" alt="">
+        <!-- <h1 class="sitename">YogaPage</h1> -->
       </a>
 
       <nav id="navmenu" class="navmenu">
@@ -81,7 +81,7 @@
   </header>
 
    <!-- Main Content -->
-   <main id="main">
+   <main class="main">
     {% block content %}
     <!-- Content will be injected here -->
     {% endblock %}
@@ -141,11 +141,7 @@
     <div class="container copyright text-center mt-4">
       <p>© <span>Copyright</span> <strong class="px-1 sitename">YogaPage</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you've purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        Designed by <a href="https://hieutran.com/">Hieu Tran</a>
       </div>
     </div>
 
