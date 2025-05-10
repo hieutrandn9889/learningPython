@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>YogaPage</title>
+  <title>SURYA HEALING YOGA</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -30,8 +30,8 @@
   <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
 
   <!-- =======================================================
-  * Template Name: YogaPage
-  * Template URL: https://bootstrapmade.com/YogaPage-multipurpose-bootstrap-template/
+  * Template Name: SURYA HEALING YOGA
+  * Template URL: https://bootstrapmade.com/SURYA HEALING YOGA-multipurpose-bootstrap-template/
   * Updated: Aug 07 2024 with Bootstrap v5.3.3
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
@@ -46,35 +46,35 @@
       <a href="{% url 'index' %}" class="logo d-flex align-items-center me-auto">
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <img src="{% static 'assets/img/logo.png' %}" alt="">
-        <!-- <h1 class="sitename">YogaPage</h1> -->
+        <!-- <h1 class="sitename">SURYA HEALING YOGA</h1> -->
       </a>
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="{% url 'index' %}" class="active">Home<br></a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#courses">Courses</a></li>
-          <li><a href="#portfolio">Portfolio</a></li>
-          <li><a href="#team">Team</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="{% url 'index' %}" class="active">Trang Chủ<br></a></li>
+          <li><a href="#about">Giới Thiệu</a></li>
+          <li><a href="#courses">Khóa Học</a></li>
+          <li><a href="#portfolio">Hình Ảnh</a></li>
+          <li><a href="#team">Đội Ngũ</a></li>
+          <li><a href="#contact">Liên Hệ</a></li>
           {% if user.is_authenticated %}
           <li class="dropdown"><a href="#"><span>My Profile</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="#" class="btn-profile">Profile</a></li>
-              <li><a href="{% url 'logout' %}" class="btn-logout">Logout</a></li>
+              <li><a href="{% url 'logout' %}" class="btn-logout">Đăng Xuất</a></li>
             </ul>
           </li>
           {% endif %}
 
           {% if not user.is_authenticated %}
-          <li><a href="{% url 'login' %}">Login</a></li>
+          <li><a href="{% url 'login' %}">Đăng Nhập</a></li>
           {% endif %}
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
       {% if not user.is_authenticated %}
-      <a class="btn-getstarted" href="{% url 'register' %}">Register</a>
+      <a class="btn-getstarted" href="{% url 'register' %}">Đăng Ký</a>
       {% endif %}
     </div>
   </header>
@@ -84,7 +84,7 @@
     <!-- Hero Section -->
     <section id="hero" class="hero section">
 
-      <img src="{% static 'assets/img/hero-bg-abstract.jpg' %}" alt="" data-aos="fade-in" class="">
+      <img src="{% static 'assets/img/hero-bg-abstract2.jpg' %}" alt="" data-aos="fade-in" class="">
 
       <div class="container">
         <div class="row justify-content-center" data-aos="zoom-out">
@@ -92,9 +92,9 @@
             {% if user.is_authenticated %}
               <h1>Welcome, {{ user.username }}!</h1>
             {% else %}
-              <h1>Welcome to Yoga Page!</h1>
+              <h1>Welcome to SURYA HEALING YOGA!</h1>
             {% endif %}
-            <p>We are Yoga team</p>
+            <p>We are SURYA HEALING YOGA Team</p>
           </div>
         </div>
         <div class="text-center" data-aos="zoom-out" data-aos-delay="100">
@@ -205,7 +205,7 @@
     <section id="courses" class="services section light-background">
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Courses</h2>
+        <h2>Khóa Học</h2>
         <p>Danh sách các khóa học</p>
       </div><!-- End Section Title -->
       <div class="container">
@@ -267,7 +267,7 @@
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Testimonials</h2>
+        <h2>Nhận Xét Khách Hàng</h2>
         <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
       </div><!-- End Section Title -->
 
@@ -380,7 +380,7 @@
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Portfolio</h2>
+        <h2>Hình Ảnh</h2>
         <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
       </div><!-- End Section Title -->
 
@@ -500,7 +500,7 @@
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Team</h2>
+        <h2>Đội Ngũ</h2>
         <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
       </div><!-- End Section Title -->
 
@@ -592,7 +592,7 @@
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <h2>Contact</h2>
+        <h2>Liên Hệ</h2>
         <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
       </div><!-- End Section Title -->
 
@@ -677,7 +677,7 @@
       <div class="row gy-4">
         <div class="col-lg-5 col-md-12 footer-about">
           <a href="index.html" class="logo d-flex align-items-center">
-            <span class="sitename">YogaPage</span>
+            <span class="sitename">SURYA HEALING YOGA</span>
           </a>
           <p>Cras fermentum odio eu feugiat lide par naso tierra. Justo eget nada terra videa magna derita valies darta donna mare fermentum iaculis eu non diam phasellus.</p>
           <div class="social-links d-flex mt-4">
@@ -723,7 +723,7 @@
     </div>
 
     <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename">YogaPage</strong> <span>All Rights Reserved</span></p>
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">SURYA HEALING YOGA</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
        Designed by <a href="https://hieutran.com/">Hieu Tran</a>
       </div>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>YogaPage</title>
+  <title>SURYAHEALINGYOGA</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -29,8 +29,8 @@
   <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
 
   <!-- =======================================================
-  * Template Name: YogaPage
-  * Template URL: https://bootstrapmade.com/YogaPage-multipurpose-bootstrap-template/
+  * Template Name: SURYAHEALINGYOGA
+  * Template URL: https://bootstrapmade.com/SURYAHEALINGYOGA-multipurpose-bootstrap-template/
   * Updated: Aug 07 2024 with Bootstrap v5.3.3
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
@@ -45,28 +45,28 @@
       <a href="{% url 'index' %}" class="logo d-flex align-items-center me-auto">
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <img src="{% static 'assets/img/logo.png' %}" alt="">
-        <!-- <h1 class="sitename">YogaPage</h1> -->
+        <!-- <h1 class="sitename">SURYAHEALINGYOGA</h1> -->
       </a>
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="{% url 'index' %}" class="active">Home<br></a></li>
-          <li><a href="{% url 'about' %}">About</a></li>
-          <li><a href="{% url 'courses' %}">Courses</a></li>
-          <li><a href="{% url 'portfolio' %}">Portfolio</a></li>
-          <li><a href="{% url 'team' %}">Team</a></li>
-          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li><a href="{% url 'index' %}" class="active">Trang Chủ<br></a></li>
+          <li><a href="{% url 'about' %}">Giới Thiệu</a></li>
+          <li><a href="{% url 'courses' %}">Khóa Học</a></li>
+          <li><a href="{% url 'portfolio' %}">Hình Ảnh</a></li>
+          <li><a href="{% url 'team' %}">Đội Ngũ</a></li>
+          <li><a href="{% url 'contact' %}">Liên Hệ</a></li>
           {% if user.is_authenticated %}
           <li class="dropdown"><a href="#"><span>My Profile</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="#" class="btn-profile">Profile</a></li>
-              <li><a href="{% url 'logout' %}" class="btn-logout">Logout</a></li>
+              <li><a href="{% url 'logout' %}" class="btn-logout">Đăng Xuất</a></li>
             </ul>
           </li>
           {% endif %}
 
           {% if not user.is_authenticated %}
-          <li><a href="{% url 'login' %}">Login</a></li>
+          <li><a href="{% url 'login' %}">Đăng Nhập</a></li>
           {% endif %}
         </ul>
 
@@ -75,7 +75,7 @@
       </nav>
 
       {% if not user.is_authenticated %}
-      <a class="btn-getstarted" href="{% url 'register' %}">Register</a>
+      <a class="btn-getstarted" href="{% url 'register' %}">Đăng Ký</a>
       {% endif %}
     </div>
   </header>
@@ -93,7 +93,7 @@
       <div class="row gy-4">
         <div class="col-lg-5 col-md-12 footer-about">
           <a href="index.html" class="logo d-flex align-items-center">
-            <span class="sitename">YogaPage</span>
+            <span class="sitename">SURYAHEALINGYOGA</span>
           </a>
           <p>Cras fermentum odio eu feugiat lide par naso tierra. Justo eget nada terra videa magna derita valies darta donna mare fermentum iaculis eu non diam phasellus.</p>
           <div class="social-links d-flex mt-4">
@@ -139,7 +139,7 @@
     </div>
 
     <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename">YogaPage</strong> <span>All Rights Reserved</span></p>
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">SURYAHEALINGYOGA</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
         Designed by <a href="https://hieutran.com/">Hieu Tran</a>
       </div>
