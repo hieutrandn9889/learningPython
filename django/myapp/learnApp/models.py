@@ -18,7 +18,7 @@ class price_course(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     details = models.TextField(max_length=500)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    price = models.IntegerField(default=0)  # Updated to IntegerField for VND
 
     def __str__(self):
         return self.name

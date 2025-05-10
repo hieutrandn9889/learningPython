@@ -75,8 +75,6 @@ def register(request):
     # Render the registration form for GET requests
     return render(request, 'register.html')
 
-
-
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
