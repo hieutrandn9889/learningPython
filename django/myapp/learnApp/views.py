@@ -13,7 +13,7 @@ from django.shortcuts import render, get_object_or_404
 
 
 from .models import Course
-from .models import price_course
+from .models import price_course  
 
 # Create your views here.
 def index(request):
@@ -106,7 +106,7 @@ def forgot_password(request):
             user = User.objects.get(email=email)
             # Generate a reset link (for simplicity, just a placeholder here)
             reset_link = f"http://127.0.0.1:8000/reset-password/{user.id}/"
-            
+
             # Send the reset link via email
             send_mail(
                 'Password Reset Request',
@@ -146,3 +146,6 @@ def team(request):
 
 def contact(request):
     return render(request, 'contact.html')
+
+def price_course_detail(request):
+    return render(request, 'price_course_detail.html')
