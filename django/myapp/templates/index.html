@@ -11,7 +11,7 @@
   <meta name="keywords" content="">
 
   <!-- Favicons -->
-  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/favicon2.png' %}" rel="icon">
   <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -84,7 +84,7 @@
     <!-- Hero Section -->
     <section id="hero" class="hero section">
 
-      <img src="{% static 'assets/img/hero-bg-abstract2.jpg' %}" alt="" data-aos="fade-in" class="">
+      <img src="{% static 'assets/img/hero-bg-abstract1.jpg' %}" alt="" data-aos="fade-in" class="">
 
       <div class="container">
         <div class="row justify-content-center" data-aos="zoom-out">
@@ -94,7 +94,7 @@
             {% else %}
               <h1>Welcome to SURYA HEALING YOGA!</h1>
             {% endif %}
-            <p>We are SURYA HEALING YOGA Team</p>
+            <p>Chúng tôi là đội ngũ SURYA HEALING YOGA</p>
           </div>
         </div>
         <div class="text-center" data-aos="zoom-out" data-aos-delay="100">
@@ -691,11 +691,11 @@
         <div class="col-lg-2 col-6 footer-links">
           <h4>Useful Links</h4>
           <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About us</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">Terms of service</a></li>
-            <li><a href="#">Privacy policy</a></li>
+            <li><a href="{% url 'index' %}">Trang Chủ</a></li>
+            <li><a href="#about">Giới Thiệu</a></li>
+            <li><a href="#">Dịch Vụ</a></li>
+            <li><a href="#">Điều Khoản Dịch Vụ</a></li>
+            <li><a href="#">Chính Sách Bảo Mật</a></li>
           </ul>
         </div>
 
