@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 {% block content %}
    
     <!-- Courses Section -->
@@ -24,7 +25,7 @@
                   <h3>{{ PriceCourses.name }}</h3>
                 </a>
                 <p>{{ PriceCourses.details }}</p>
-                <h3>Price: {{ PriceCourses.price }}VND</h3>
+                <p>Price: {{ PriceCourses.price|intcomma }} VND</p>
               </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
@@ -54,7 +55,7 @@
                   <h3>{{ PriceCourses.name }}</h3>
                 </a>
                 <p>{{ PriceCourses.details }}</p>
-                <h3>Price: {{ PriceCourses.price }}VND</h3>
+                <H2>Price: {{ PriceCourses.price|intcomma }} VND</H2>
               </div>
             </div>
           {% endfor %}<!-- End Service Item -->

@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -222,7 +223,7 @@
                   <h3>{{ PriceCourses.name }}</h3>
                 </a>
                 <p>{{ PriceCourses.details }}</p>
-                <h3>Price: {{ PriceCourses.price }}VND</h3>
+                <H2>Price: {{ PriceCourses.price|intcomma }} VND</H2>
               </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
@@ -237,7 +238,7 @@
                   <h3>{{ PriceCourses.name }}</h3>
                 </a>
                 <p>{{ PriceCourses.details }}</p>
-                <h3>Price: {{ PriceCourses.price }}VND</h3>
+                <H2>Price: {{ PriceCourses.price|intcomma }} VND</H2>
               </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
@@ -252,7 +253,7 @@
                   <h3>{{ PriceCourses.name }}</h3>
                 </a>
                 <p>{{ PriceCourses.details }}</p>
-                <h3>Price: {{ PriceCourses.price }}VND</h3>
+                <h2>Price: {{ PriceCourses.price|intcomma }} VND</h2>
               </div>
             </div>
           {% endfor %}<!-- End Service Item -->

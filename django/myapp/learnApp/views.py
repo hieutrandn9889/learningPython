@@ -10,10 +10,12 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
+from django.utils.formats import number_format
 
 
 from .models import Course
 from .models import price_course  
+
 
 # Create your views here.
 def index(request):
