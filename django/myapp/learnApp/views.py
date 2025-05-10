@@ -13,11 +13,13 @@ from django.shortcuts import render, get_object_or_404
 
 
 from .models import Course
+from .models import price_course
 
 # Create your views here.
 def index(request):
         courses = Course.objects.all()  # Fetch all Course objects from the database
-        return render(request, 'index.html', {'courses': courses})
+        PriceCourses = price_course.objects.all()  # Fetch all PriceCourses objects from the database
+        return render(request, 'index.html', {'courses': courses, 'PriceCourses': PriceCourses})
 
 @csrf_exempt
 def register(request):
