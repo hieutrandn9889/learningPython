@@ -20,7 +20,7 @@
         <form method="post" class="register-form">
             {% csrf_token %}
             <div class="form-group">
-                <label for="username">Username:</label>
+                <label for="username">Tài Khoản:</label>
                 <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required>
             </div>
             <div class="form-group">
@@ -28,19 +28,19 @@
                 <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
             </div>
             <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+                <label for="password">Mật Khẩu:</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Nhập mật khẩu của bạn" required>
             </div>
             <div class="form-group">
-                <label for="confirm_password">Confirm Password:</label>
-                <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Confirm your password" required>
+                <label for="confirm_password">Xác Nhận Mật Khẩu:</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Xác nhận mật khẩu của bạn" required>
             </div>
-            <button type="submit" class="btn-submit">Register</button>
+            <button type="submit" class="btn-submit">Đăng Ký</button>
         </form>
         <br>
-        <p>By registering, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
-        <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
-        
+        <p>Bằng việc đăng ký, bạn đồng ý với <a href="#">Điều Khoản Dịch Vụ</a> và <a href="#">Chính Sách Bảo Mật</a>.</p>
+        <p>Bạn đã có tài khoản? <a href="{% url 'login' %}">Đăng Nhập ở đây</a></p>
+
     </div>
 </body>
 </html>

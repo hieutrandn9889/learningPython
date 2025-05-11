@@ -42,33 +42,33 @@ def register(request):
         
         # Validate password and confirmation
         if password != confirm_password:
-            messages.error(request, 'Passwords do not match.')
-            return render(request, 'register.html')  
+            messages.error(request, 'Mật khẩu không khớp.')
+            return render(request, 'register.html')
 
         # Password validation
         if len(password) < 8:
-            messages.error(request, 'Your password must contain at least 8 characters.')
+            messages.error(request, 'Mật khẩu của bạn phải chứa ít nhất 8 ký tự.')
             return render(request, 'register.html')
 
         if password.isdigit():
-            messages.error(request, 'Your password can’t be entirely numeric.')
+            messages.error(request, 'Mật khẩu của bạn không thể hoàn toàn là số.')
             return render(request, 'register.html')
 
         if username.lower() in password.lower() or email.lower() in password.lower():
-            messages.error(request, 'Your password can’t be too similar to your other personal information.')
+            messages.error(request, 'Mật khẩu của bạn không thể quá giống thông tin cá nhân khác.')
             return render(request, 'register.html')
 
         # Check if the password is commonly used
         common_passwords = ['password', '123456', '12345678', 'qwerty', 'abc123', 'password1']
         if password.lower() in common_passwords:
-            messages.error(request, 'Your password can’t be a commonly used password.')
+            messages.error(request, 'Mật khẩu của bạn không thể là mật khẩu thường dùng.')
             return render(request, 'register.html')
 
         # Create and save the user
         try:
             user = User.objects.create_user(username=username, password=password, email=email)
             user.save()
-            messages.success(request, 'User registered successfully! You can now log in.')
+            messages.success(request, 'Người dùng đã đăng ký thành công! Bạn có thể đăng nhập.')
             return render(request, 'login.html')
         except Exception as e:
             messages.error(request, f'An error occurred: {str(e)}')
@@ -89,11 +89,11 @@ def login(request):
         if user is not None:
             # Log the user in
             auth_login(request, user)
-            messages.success(request, 'You have successfully logged in.')
+            messages.success(request, 'Bạn đã đăng nhập thành công.')
             return redirect('index')  # Redirect to the home page or dashboard
         else:
             # Invalid credentials
-            messages.error(request, 'Invalid username or password.')
+            messages.error(request, 'Tài khoản hoặc mật khẩu không đúng.')
             return render(request, 'login.html')
 
     # Render the login form for GET requests
@@ -111,15 +111,15 @@ def forgot_password(request):
 
             # Send the reset link via email
             send_mail(
-                'Password Reset Request',
+                'Mật khẩu mới của bạn',
                 f'Hi {user.username},\n\nClick the link below to reset your password:\n{reset_link}',
                 'admin@myapp.com',  # Replace with your email
                 [email],
                 fail_silently=False,
             )
-            messages.success(request, 'A password reset link has been sent to your email.')
+            messages.success(request, 'Mật khẩu mới của bạn đã được gửi qua email. Vui lòng kiểm tra hộp thư đến của bạn.')
         except User.DoesNotExist:
-            messages.error(request, 'No account found with that email.')
+            messages.error(request, 'Không tìm thấy tài khoản với email đó.')
 
         return render(request, 'forgot_password.html')
 
@@ -127,7 +127,7 @@ def forgot_password(request):
 
 def logout(request):
     auth_logout(request)  # Log the user out
-    messages.success(request, 'You have successfully logged out.')
+    messages.success(request, 'Bạn đã đăng xuất thành công.')
     return redirect('index')  # Redirect to the login page
 
 def course_detail(request, slug):
