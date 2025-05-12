@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Access the API key
-API_KEY = os.getenv("OPENAI_Test")
+API_KEY = os.getenv("OPENAI_API_KEY")
 if not API_KEY:
-    raise ValueError("OPENAI_Test is not set in the environment variables.")
+    raise ValueError("OPENAI_API_KEY is not set in the environment variables.")
 
 class TestGoogleSearch(unittest.TestCase):
     def setUp(self):
