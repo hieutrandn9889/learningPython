@@ -19,6 +19,5 @@ class TestGoogleSearch(unittest.TestCase):
         self.al = Alumni(page)
 
     def test_search(self):
+        pass
         self.al.do("search for 'Mercury element'")
-        self.al.do("mark all tasks complete")
-        self.al.do("delete all tasks")
