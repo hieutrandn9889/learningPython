@@ -252,10 +252,6 @@ class SimplePostmanMCPServer:
                     "required": ["name", "url"]
                 }
             },
-            "list_collections": {
-                "description": "Lấy danh sách collections trong Postman",
-                "inputSchema": {"type": "object", "properties": {}}
-            },
             "list_environments": {
                 "description": "Lấy danh sách environments trong Postman",
                 "inputSchema": {"type": "object", "properties": {}}
@@ -513,26 +509,6 @@ class SimplePostmanMCPServer:
         """Tạo DELETE request (Delete)"""
         return self._create_request_with_environment("DELETE", args)
     
-    def list_collections(self) -> Dict[str, Any]:
-        """Lấy danh sách collections"""
-        try:
-            collections = self.postman_client.get_collections()
-            
-            if not collections["collections"]:
-                return self.response_formatter.success_response("📭 Không có collections nào trong Postman")
-            
-            content = "📚 Danh sách Collections:\n\n"
-            for collection in collections["collections"]:
-                content += f"• {collection['name']} (ID: {collection['id']})\n"
-                if collection.get('description'):
-                    content += f"  📝 {collection['description']}\n"
-                content += "\n"
-            
-            return self.response_formatter.success_response(content, collections)
-            
-        except Exception as e:
-            return self.response_formatter.error_response(str(e), f"❌ Lỗi khi lấy danh sách collections: {str(e)}")
-    
     def list_environments(self) -> Dict[str, Any]:
         """Lấy danh sách environments"""
         try:
@@ -586,7 +562,6 @@ class SimplePostmanMCPServer:
             "create_post_request": self.create_post_request,
             "create_put_request": self.create_put_request,
             "create_delete_request": self.create_delete_request,
-            "list_collections": self.list_collections,
             "list_environments": self.list_environments,
             "create_environment": self.create_environment
         }
@@ -613,18 +588,13 @@ def main():
     print(f"  • Default Environment ID: {server.default_environment_id or 'Không có'}")
     
     print("\n💡 Để sử dụng, gọi server.call_tool(tool_name, arguments)")
-    print("💡 Ví dụ: server.call_tool('list_collections', {})")
+    print("💡 Ví dụ: server.call_tool('create_get_request', {'name': 'Test Request', 'url': 'https://api.example.com/test'})")
     
     # Demo các tools
     print("\n🧪 Demo các tools:")
     
-    # Demo list collections
-    print("\n1. Lấy danh sách collections:")
-    result = server.list_collections()
-    print(result["content"])
-    
     # Demo create environment
-    print("\n2. Tạo environment mới:")
+    print("\n1. Tạo environment mới:")
     env_result = server.create_environment({
         "name": "Demo Environment",
         "variables": {
@@ -636,7 +606,7 @@ def main():
     
     # Demo create CRUD operations
     if server.default_collection_id:
-        print("\n3. Tạo CRUD operations cho users:")
+        print("\n2. Tạo CRUD operations cho users:")
         crud_result = server.call_tool('create_crud_operations', {
             "resource_name": "users",
             "base_url": "https://jsonplaceholder.typicode.com",
@@ -644,7 +614,7 @@ def main():
         })
         print(crud_result["content"])
     else:
-        print("\n3. Không thể tạo CRUD operations - thiếu POSTMAN_COLLECTION_ID")
+        print("\n2. Không thể tạo CRUD operations - thiếu POSTMAN_COLLECTION_ID")
 
 if __name__ == "__main__":
     main()
