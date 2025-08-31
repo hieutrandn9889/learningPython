@@ -37,8 +37,8 @@ class URLProcessor:
     def create_variable_url(protocol: str, domain: str, path: str = "") -> str:
         """Tạo URL với biến Postman"""
         if path:
-            return f"{{{{protocol}}}}{{{{base_url}}}}/{path}"
-        return f"{{{{protocol}}}}{{{{base_url}}}}"
+            return f"{{{{base_url}}}}/{path}"
+        return f"{{{{base_url}}}}"
 
 class ResponseFormatter:
     """Class định dạng response"""
@@ -102,8 +102,7 @@ class EnvironmentManager:
             protocol, domain, _ = URLProcessor.parse_url(url)
             
             env_variables = {
-                "base_url": domain,
-                "protocol": protocol,
+                "base_url": f"{protocol}{domain}",
                 "api_key": "your_api_key_here",
                 "timeout": "30"
             }
@@ -325,7 +324,7 @@ class SimplePostmanMCPServer:
                 
                 # Thêm thông tin biến URL nếu có environment
                 if env_id:
-                    content += f"\n\n💡 Biến URL: {{{{protocol}}}}{{{{base_url}}}} = {protocol}{domain}"
+                    content += f"\n\n💡 Biến URL: {{{{base_url}}}} = {protocol}{domain}"
                 
                 return self.response_formatter.success_response(content, {
                     "result": result, 
@@ -571,6 +570,179 @@ class SimplePostmanMCPServer:
         else:
             return self.response_formatter.error_response(f"Unknown tool: {name}", f"❌ Tool không tồn tại: {name}")
 
+def show_menu():
+    """Hiển thị menu chính"""
+    print("\n" + "="*50)
+    print("🚀 POSTMAN MCP SERVER - MENU CHÍNH")
+    print("="*50)
+    print("1. Tạo yêu cầu nhập API request từ bàn phím")
+    print("2. Chọn phương thức GET thì tạo request trong postman")
+    print("3. Chọn phương thức POST thì tạo request trong postman")
+    print("4. Chọn phương thức PUT thì tạo request trong postman")
+    print("5. Chọn phương thức DELETE thì tạo request trong postman")
+    print("0. Thoát")
+    print("="*50)
+
+def get_user_input(prompt: str) -> str:
+    """Lấy input từ người dùng"""
+    return input(f"📝 {prompt}: ").strip()
+
+def create_api_request_interactive(server: SimplePostmanMCPServer):
+    """Tạo API request tương tác"""
+    print("\n🔧 TẠO API REQUEST TƯƠNG TÁC")
+    print("-" * 30)
+    
+    # Lấy thông tin cơ bản
+    name = get_user_input("Nhập tên request")
+    if not name:
+        print("❌ Tên request không được để trống!")
+        return
+    
+    url = get_user_input("Nhập URL (ví dụ: https://api.example.com/users)")
+    if not url:
+        print("❌ URL không được để trống!")
+        return
+    
+    # Lấy method
+    print("\n📋 Chọn HTTP Method:")
+    print("1. GET")
+    print("2. POST") 
+    print("3. PUT")
+    print("4. DELETE")
+    
+    method_choice = get_user_input("Chọn số (1-4)")
+    method_map = {
+        "1": "GET",
+        "2": "POST", 
+        "3": "PUT",
+        "4": "DELETE"
+    }
+    
+    if method_choice not in method_map:
+        print("❌ Lựa chọn không hợp lệ!")
+        return
+    
+    method = method_map[method_choice]
+    
+    # Lấy headers
+    headers = {}
+    print("\n📋 Headers (nhấn Enter để bỏ qua):")
+    content_type = get_user_input("Content-Type (mặc định: application/json)")
+    if content_type:
+        headers["Content-Type"] = content_type
+    else:
+        headers["Content-Type"] = "application/json"
+    
+    # Lấy body cho POST/PUT
+    body = None
+    if method in ["POST", "PUT"]:
+        print("\n📋 Body (nhấn Enter để bỏ qua):")
+        body_input = get_user_input("Body JSON (ví dụ: {\"name\": \"test\"})")
+        if body_input:
+            try:
+                body = json.loads(body_input)
+            except json.JSONDecodeError:
+                print("❌ JSON không hợp lệ!")
+                return
+    
+    # Lấy expected status
+    expected_status = get_user_input("Expected Status Code (mặc định: 200 cho GET/PUT/DELETE, 201 cho POST)")
+    if expected_status:
+        try:
+            expected_status = int(expected_status)
+        except ValueError:
+            print("❌ Status code phải là số!")
+            return
+    else:
+        expected_status = 201 if method == "POST" else 200
+    
+    # Tạo request
+    print(f"\n🔄 Đang tạo {method} request...")
+    
+    args = {
+        "name": name,
+        "url": url,
+        "headers": headers,
+        "expected_status": expected_status
+    }
+    
+    if body:
+        args["body"] = body
+    
+    # Gọi tool tương ứng
+    tool_name = f"create_{method.lower()}_request"
+    result = server.call_tool(tool_name, args)
+    
+    print(result["content"])
+
+def create_method_request(server: SimplePostmanMCPServer, method: str):
+    """Tạo request cho method cụ thể"""
+    print(f"\n🔧 TẠO {method} REQUEST")
+    print("-" * 30)
+    
+    # Lấy thông tin cơ bản
+    name = get_user_input("Nhập tên request")
+    if not name:
+        print("❌ Tên request không được để trống!")
+        return
+    
+    url = get_user_input("Nhập URL")
+    if not url:
+        print("❌ URL không được để trống!")
+        return
+    
+    # Lấy headers
+    headers = {}
+    print("\n📋 Headers (nhấn Enter để bỏ qua):")
+    content_type = get_user_input("Content-Type (mặc định: application/json)")
+    if content_type:
+        headers["Content-Type"] = content_type
+    else:
+        headers["Content-Type"] = "application/json"
+    
+    # Lấy body cho POST/PUT
+    body = None
+    if method in ["POST", "PUT"]:
+        print("\n📋 Body (nhấn Enter để bỏ qua):")
+        body_input = get_user_input("Body JSON (ví dụ: {\"name\": \"test\"})")
+        if body_input:
+            try:
+                body = json.loads(body_input)
+            except json.JSONDecodeError:
+                print("❌ JSON không hợp lệ!")
+                return
+    
+    # Lấy expected status
+    default_status = 201 if method == "POST" else 200
+    expected_status = get_user_input(f"Expected Status Code (mặc định: {default_status})")
+    if expected_status:
+        try:
+            expected_status = int(expected_status)
+        except ValueError:
+            print("❌ Status code phải là số!")
+            return
+    else:
+        expected_status = default_status
+    
+    # Tạo request
+    print(f"\n🔄 Đang tạo {method} request...")
+    
+    args = {
+        "name": name,
+        "url": url,
+        "headers": headers,
+        "expected_status": expected_status
+    }
+    
+    if body:
+        args["body"] = body
+    
+    # Gọi tool tương ứng
+    tool_name = f"create_{method.lower()}_request"
+    result = server.call_tool(tool_name, args)
+    
+    print(result["content"])
+
 def main():
     """Main function để chạy server"""
     server = SimplePostmanMCPServer()
@@ -587,34 +759,29 @@ def main():
     print(f"  • Default Collection ID: {server.default_collection_id or 'Không có'}")
     print(f"  • Default Environment ID: {server.default_environment_id or 'Không có'}")
     
-    print("\n💡 Để sử dụng, gọi server.call_tool(tool_name, arguments)")
-    print("💡 Ví dụ: server.call_tool('create_get_request', {'name': 'Test Request', 'url': 'https://api.example.com/test'})")
-    
-    # Demo các tools
-    print("\n🧪 Demo các tools:")
-    
-    # Demo create environment
-    print("\n1. Tạo environment mới:")
-    env_result = server.create_environment({
-        "name": "Demo Environment",
-        "variables": {
-            "base_url": "https://api.demo.com",
-            "api_key": "demo_key_123"
-        }
-    })
-    print(env_result["content"])
-    
-    # Demo create CRUD operations
-    if server.default_collection_id:
-        print("\n2. Tạo CRUD operations cho users:")
-        crud_result = server.call_tool('create_crud_operations', {
-            "resource_name": "users",
-            "base_url": "https://jsonplaceholder.typicode.com",
-            "headers": {"Content-Type": "application/json"}
-        })
-        print(crud_result["content"])
-    else:
-        print("\n2. Không thể tạo CRUD operations - thiếu POSTMAN_COLLECTION_ID")
+    # Menu tương tác
+    while True:
+        show_menu()
+        choice = get_user_input("Chọn số (0-5)")
+        
+        if choice == "0":
+            print("👋 Tạm biệt!")
+            break
+        elif choice == "1":
+            create_api_request_interactive(server)
+        elif choice == "2":
+            create_method_request(server, "GET")
+        elif choice == "3":
+            create_method_request(server, "POST")
+        elif choice == "4":
+            create_method_request(server, "PUT")
+        elif choice == "5":
+            create_method_request(server, "DELETE")
+        else:
+            print("❌ Lựa chọn không hợp lệ! Vui lòng chọn lại.")
+        
+        # Pause để người dùng đọc kết quả
+        input("\n⏸️  Nhấn Enter để tiếp tục...")
 
 if __name__ == "__main__":
     main()
