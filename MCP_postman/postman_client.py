@@ -218,3 +218,122 @@ pm.test("Response time is less than 2000ms", function () {{
             return response.json()
         else:
             raise Exception(f"Failed to get environments: {response.text}")
+    
+    def create_folder(self, collection_id: str, folder_name: str, description: str = "") -> Dict[str, Any]:
+        """Tạo folder mới trong collection"""
+        folder_item = {
+            "name": folder_name,
+            "item": [],
+            "description": description
+        }
+        
+        # Lấy collection hiện tại
+        collection_response = requests.get(
+            f"{config.POSTMAN_COLLECTIONS_URL}/{collection_id}",
+            headers=self.headers
+        )
+        
+        if collection_response.status_code != 200:
+            raise Exception(f"Failed to get collection: {collection_response.text}")
+        
+        collection = collection_response.json()["collection"]
+        collection["item"].append(folder_item)
+        
+        # Cập nhật collection
+        update_response = requests.put(
+            f"{config.POSTMAN_COLLECTIONS_URL}/{collection_id}",
+            headers=self.headers,
+            json={"collection": collection}
+        )
+        
+        if update_response.status_code == 200:
+            return update_response.json()
+        else:
+            raise Exception(f"Failed to create folder: {update_response.text}")
+    
+    def add_request_to_folder(self, collection_id: str, folder_name: str, name: str, method: str, url: str,
+                            headers: Optional[Dict[str, str]] = None,
+                            body: Optional[Dict[str, Any]] = None,
+                            expected_status: int = 200) -> Dict[str, Any]:
+        """Thêm request vào folder cụ thể trong collection"""
+        
+        # Tạo request item
+        request_item = {
+            "name": name,
+            "request": {
+                "method": method.upper(),
+                "header": [
+                    {"key": key, "value": value, "type": "text"}
+                    for key, value in (headers or {}).items()
+                ],
+                "url": self._parse_url_for_postman(url)
+            }
+        }
+        
+        # Thêm body nếu có
+        if body:
+            request_item["request"]["body"] = {
+                "mode": "raw",
+                "raw": json.dumps(body, indent=2),
+                "options": {
+                    "raw": {
+                        "language": "json"
+                    }
+                }
+            }
+        
+        # Thêm test script
+        test_script = f"""
+pm.test("Status code is {expected_status}", function () {{
+    pm.response.to.have.status({expected_status});
+}});
+
+pm.test("Response time is less than 2000ms", function () {{
+    pm.expect(pm.response.responseTime).to.be.below(2000);
+}});
+"""
+        
+        request_item["request"]["event"] = [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": test_script.split("\n"),
+                    "type": "text/javascript"
+                }
+            }
+        ]
+        
+        # Lấy collection hiện tại
+        collection_response = requests.get(
+            f"{config.POSTMAN_COLLECTIONS_URL}/{collection_id}",
+            headers=self.headers
+        )
+        
+        if collection_response.status_code != 200:
+            raise Exception(f"Failed to get collection: {collection_response.text}")
+        
+        collection = collection_response.json()["collection"]
+        
+        # Tìm folder
+        folder_found = False
+        for item in collection["item"]:
+            if item.get("name") == folder_name and "item" in item:
+                # Đây là folder, thêm request vào
+                item["item"].append(request_item)
+                folder_found = True
+                break
+        
+        if not folder_found:
+            raise Exception(f"Folder '{folder_name}' not found in collection")
+        
+        # Cập nhật collection
+        update_response = requests.put(
+            f"{config.POSTMAN_COLLECTIONS_URL}/{collection_id}",
+            headers=self.headers,
+            json={"collection": collection}
+        )
+        
+        if update_response.status_code == 200:
+            return update_response.json()
+        else:
+            raise Exception(f"Failed to add request to folder: {update_response.text}")

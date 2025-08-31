@@ -592,7 +592,33 @@ def create_api_request_interactive(server: SimplePostmanMCPServer):
     print("\n🔧 TẠO API REQUEST TƯƠNG TÁC")
     print("-" * 30)
     
-    # Lấy thông tin cơ bản
+    # Tạo folder trước
+    print("📁 TẠO FOLDER")
+    print("-" * 15)
+    folder_name = get_user_input("Nhập tên folder")
+    if not folder_name:
+        print("❌ Tên folder không được để trống!")
+        return
+    
+    folder_description = get_user_input("Nhập mô tả folder (nhấn Enter để bỏ qua)")
+    
+    # Tạo folder trong Postman
+    collection_id = server._get_collection_id({})
+    if not collection_id:
+        print("❌ Không có collection ID!")
+        return
+    
+    try:
+        print(f"\n🔄 Đang tạo folder '{folder_name}'...")
+        folder_result = server.postman_client.create_folder(collection_id, folder_name, folder_description)
+        print(f"✅ Đã tạo folder: {folder_name}")
+    except Exception as e:
+        print(f"❌ Lỗi khi tạo folder: {str(e)}")
+        return
+    
+    # Lấy thông tin request
+    print(f"\n📋 THÔNG TIN REQUEST")
+    print("-" * 20)
     name = get_user_input("Nhập tên request")
     if not name:
         print("❌ Tên request không được để trống!")
@@ -656,24 +682,40 @@ def create_api_request_interactive(server: SimplePostmanMCPServer):
     else:
         expected_status = 201 if method == "POST" else 200
     
-    # Tạo request
-    print(f"\n🔄 Đang tạo {method} request...")
+    # Tạo request trong folder
+    print(f"\n🔄 Đang tạo {method} request trong folder '{folder_name}'...")
     
-    args = {
-        "name": name,
-        "url": url,
-        "headers": headers,
-        "expected_status": expected_status
-    }
-    
-    if body:
-        args["body"] = body
-    
-    # Gọi tool tương ứng
-    tool_name = f"create_{method.lower()}_request"
-    result = server.call_tool(tool_name, args)
-    
-    print(result["content"])
+    try:
+        result = server.postman_client.add_request_to_folder(
+            collection_id=collection_id,
+            folder_name=folder_name,
+            name=name,
+            method=method,
+            url=url,
+            headers=headers,
+            body=body,
+            expected_status=expected_status
+        )
+        
+        # Hiển thị kết quả
+        content = f"""
+✅ {method} Request đã được tạo thành công trong folder '{folder_name}'!
+
+📋 Thông tin:
+- Tên: {name}
+- Method: {method}
+- URL: {url}
+- Folder: {folder_name}
+- Expected Status: {expected_status}
+- Collection ID: {collection_id}
+
+🔗 Collection URL: https://go.postman.co/collection/{collection_id}
+"""
+        
+        print(content)
+        
+    except Exception as e:
+        print(f"❌ Lỗi khi tạo request: {str(e)}")
 
 def create_method_request(server: SimplePostmanMCPServer, method: str):
     """Tạo request cho method cụ thể"""
