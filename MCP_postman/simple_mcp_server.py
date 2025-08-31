@@ -1,17 +1,147 @@
 #!/usr/bin/env python3
 """
 Simple MCP Server cho Postman
-Phiên bản đơn giản để tránh các vấn đề import phức tạp
+Phiên bản tối ưu hóa với code DRY và cấu trúc tốt hơn
 """
 
 import asyncio
 import json
 import sys
 import os
+from urllib.parse import urlparse
 from dotenv import load_dotenv
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 from postman_client import PostmanClient
 from models import APIRequest, Environment, Collection
+
+class URLProcessor:
+    """Class xử lý URL và tách thành các thành phần"""
+    
+    @staticmethod
+    def parse_url(url: str) -> Tuple[str, str, str]:
+        """
+        Tách URL thành protocol, domain và path
+        Returns: (protocol, domain, path)
+        """
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        parsed = urlparse(url)
+        protocol = f"{parsed.scheme}://"
+        domain = parsed.netloc
+        path = parsed.path.lstrip('/')
+        
+        return protocol, domain, path
+    
+    @staticmethod
+    def create_variable_url(protocol: str, domain: str, path: str = "") -> str:
+        """Tạo URL với biến Postman"""
+        if path:
+            return f"{{{{protocol}}}}{{{{base_url}}}}/{path}"
+        return f"{{{{protocol}}}}{{{{base_url}}}}"
+
+class ResponseFormatter:
+    """Class định dạng response"""
+    
+    @staticmethod
+    def success_response(content: str, data: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Tạo response thành công"""
+        response = {
+            "success": True,
+            "content": content
+        }
+        if data:
+            response["data"] = data
+        return response
+    
+    @staticmethod
+    def error_response(error: str, content: str = None) -> Dict[str, Any]:
+        """Tạo response lỗi"""
+        return {
+            "success": False,
+            "error": error,
+            "content": content or f"❌ Lỗi: {error}"
+        }
+    
+    @staticmethod
+    def format_request_info(name: str, method: str, url: str, collection_id: str, 
+                          env_id: str = None, expected_status: int = None) -> str:
+        """Format thông tin request"""
+        info = f"""
+✅ {method} Request đã được tạo thành công!
+
+📋 Thông tin:
+- Tên: {name}
+- Method: {method}
+- URL: {url}
+- Collection ID: {collection_id}"""
+        
+        if expected_status:
+            info += f"\n- Expected Status: {expected_status}"
+        if env_id:
+            info += f"\n- Environment ID: {env_id}"
+        else:
+            info += f"\n- Environment ID: Không có"
+        
+        info += f"\n\n🔗 Collection URL: https://go.postman.co/collection/{collection_id}"
+        if env_id:
+            info += f"\n🔗 Environment URL: https://go.postman.co/environment/{env_id}"
+        
+        return info
+
+class EnvironmentManager:
+    """Class quản lý environment"""
+    
+    def __init__(self, postman_client: PostmanClient, default_env_id: str = None):
+        self.postman_client = postman_client
+        self.default_env_id = default_env_id
+    
+    def create_default_environment(self, url: str, env_name: str = "Default Environment") -> Optional[str]:
+        """Tạo environment mặc định từ URL"""
+        try:
+            protocol, domain, _ = URLProcessor.parse_url(url)
+            
+            env_variables = {
+                "base_url": domain,
+                "protocol": protocol,
+                "api_key": "your_api_key_here",
+                "timeout": "30"
+            }
+            
+            env_result = self.postman_client.create_environment(env_name, env_variables)
+            if env_result and 'environment' in env_result:
+                env_id = env_result["environment"]["id"]
+                print(f"✅ Đã tạo environment mới: {env_name} (ID: {env_id})")
+                return env_id
+        except Exception as e:
+            print(f"⚠️  Không thể tạo environment: {str(e)}")
+        
+        return self.default_env_id
+    
+    def create_resource_environment(self, resource_name: str, base_url: str, 
+                                  custom_variables: Dict[str, Any] = None) -> Optional[str]:
+        """Tạo environment cho resource"""
+        try:
+            env_name = f"{resource_name.title()} Environment"
+            env_variables = {
+                "base_url": base_url,
+                "resource_name": resource_name,
+                "api_key": "your_api_key_here",
+                "timeout": "30"
+            }
+            
+            if custom_variables:
+                env_variables.update(custom_variables)
+            
+            env_result = self.postman_client.create_environment(env_name, env_variables)
+            if env_result and 'environment' in env_result:
+                env_id = env_result["environment"]["id"]
+                print(f"✅ Đã tạo environment: {env_name} (ID: {env_id})")
+                return env_id
+        except Exception as e:
+            print(f"⚠️  Lỗi tạo environment: {str(e)}")
+        
+        return self.default_env_id
 
 class SimplePostmanMCPServer:
     def __init__(self):
@@ -21,7 +151,17 @@ class SimplePostmanMCPServer:
         self.default_collection_id = os.getenv('POSTMAN_COLLECTION_ID')
         self.default_environment_id = os.getenv('POSTMAN_ENVIRONMENT_ID')
         
-        self.tools = {
+        # Initialize helpers
+        self.url_processor = URLProcessor()
+        self.response_formatter = ResponseFormatter()
+        self.env_manager = EnvironmentManager(self.postman_client, self.default_environment_id)
+        
+        # Load tools configuration
+        self.tools = self._load_tools_config()
+    
+    def _load_tools_config(self) -> Dict[str, Any]:
+        """Load cấu hình tools"""
+        return {
             "create_api_request": {
                 "description": "Tạo API request mới trong Postman với expected status 200",
                 "inputSchema": {
@@ -133,6 +273,75 @@ class SimplePostmanMCPServer:
             }
         }
     
+    def _get_collection_id(self, args: Dict[str, Any]) -> Optional[str]:
+        """Lấy collection ID từ args hoặc default"""
+        collection_id = args.get("collection_id") or self.default_collection_id
+        
+        if not collection_id:
+            # Lấy collection đầu tiên nếu không có default
+            collections = self.postman_client.get_collections()
+            if collections["collections"]:
+                collection_id = collections["collections"][0]["id"]
+                print(f"⚠️  Sử dụng collection đầu tiên: {collections['collections'][0]['name']} (ID: {collection_id})")
+        
+        return collection_id
+    
+    def _create_request_with_environment(self, method: str, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Tạo request với environment support"""
+        try:
+            collection_id = self._get_collection_id(args)
+            if not collection_id:
+                return self.response_formatter.error_response(
+                    "Không có collection nào và không thể tạo collection mới",
+                    "❌ Lỗi: Không có collection nào trong Postman. Hãy tạo collection trước hoặc set POSTMAN_COLLECTION_ID trong file .env"
+                )
+            
+            # Xử lý environment
+            env_id = self.default_environment_id
+            if not env_id:
+                env_id = self.env_manager.create_default_environment(args["url"])
+            
+            # Xử lý URL với biến
+            original_url = args["url"]
+            protocol, domain, path = self.url_processor.parse_url(original_url)
+            
+            if env_id:
+                url = self.url_processor.create_variable_url(protocol, domain, path)
+            else:
+                url = original_url
+            
+            # Tạo request
+            result = self.postman_client.add_request_to_collection(
+                collection_id=collection_id,
+                name=args["name"],
+                method=method,
+                url=url,
+                headers=args.get("headers", {"Content-Type": "application/json"}),
+                body=args.get("body"),
+                expected_status=args.get("expected_status", 200 if method != "POST" else 201)
+            )
+            
+            if result:
+                content = self.response_formatter.format_request_info(
+                    args["name"], method, url, collection_id, env_id, 
+                    args.get("expected_status", 200 if method != "POST" else 201)
+                )
+                
+                # Thêm thông tin biến URL nếu có environment
+                if env_id:
+                    content += f"\n\n💡 Biến URL: {{{{protocol}}}}{{{{base_url}}}} = {protocol}{domain}"
+                
+                return self.response_formatter.success_response(content, {
+                    "result": result, 
+                    "environment_id": env_id,
+                    "collection_id": collection_id
+                })
+            else:
+                return self.response_formatter.error_response(f"Không thể tạo {method} request")
+                
+        except Exception as e:
+            return self.response_formatter.error_response(str(e), f"❌ Lỗi khi tạo {method} request: {str(e)}")
+    
     def list_tools(self) -> Dict[str, Any]:
         """Trả về danh sách tools có sẵn"""
         return {
@@ -161,20 +370,12 @@ class SimplePostmanMCPServer:
                 env_id = self.default_environment_id
             
             # Lấy collection ID
-            collection_id = args.get("collection_id") or self.default_collection_id
-            
+            collection_id = self._get_collection_id(args)
             if not collection_id:
-                # Nếu không có collection_id, lấy collection đầu tiên
-                collections = self.postman_client.get_collections()
-                if collections["collections"]:
-                    collection_id = collections["collections"][0]["id"]
-                    print(f"⚠️  Sử dụng collection đầu tiên: {collections['collections'][0]['name']} (ID: {collection_id})")
-                else:
-                    return {
-                        "success": False,
-                        "error": "Không có collection nào và không thể tạo collection mới",
-                        "content": "❌ Lỗi: Không có collection nào trong Postman. Hãy tạo collection trước hoặc set POSTMAN_COLLECTION_ID trong file .env"
-                    }
+                return self.response_formatter.error_response(
+                    "Không có collection nào và không thể tạo collection mới",
+                    "❌ Lỗi: Không có collection nào trong Postman. Hãy tạo collection trước hoặc set POSTMAN_COLLECTION_ID trong file .env"
+                )
             
             # Tạo API request
             api_request = APIRequest(
@@ -197,7 +398,7 @@ class SimplePostmanMCPServer:
                 expected_status=200
             )
             
-            response_text = f"""
+            content = f"""
 ✅ API Request đã được tạo thành công!
 
 📋 Thông tin:
@@ -211,139 +412,60 @@ class SimplePostmanMCPServer:
 🔗 Collection URL: https://go.postman.co/collection/{collection_id}
 """
             
-            return {
-                "success": True,
-                "content": response_text,
-                "data": {
-                    "collection_id": collection_id,
-                    "environment_id": env_id,
-                    "api_request": api_request.model_dump()
-                }
-            }
+            return self.response_formatter.success_response(content, {
+                "collection_id": collection_id,
+                "environment_id": env_id,
+                "api_request": api_request.model_dump()
+            })
             
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi tạo API request: {str(e)}"
-            }
+            return self.response_formatter.error_response(str(e), f"❌ Lỗi khi tạo API request: {str(e)}")
     
     def create_crud_operations(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo đầy đủ CRUD operations cho một resource"""
         try:
             resource_name = args["resource_name"]
             base_url = args["base_url"]
-            collection_id = args.get("collection_id") or self.default_collection_id
+            collection_id = self._get_collection_id(args)
             headers = args.get("headers", {"Content-Type": "application/json"})
             
             if not collection_id:
-                return {
-                    "success": False,
-                    "error": "Không có collection ID",
-                    "content": "❌ Lỗi: Không có collection ID. Hãy set POSTMAN_COLLECTION_ID trong file .env"
-                }
+                return self.response_formatter.error_response(
+                    "Không có collection ID",
+                    "❌ Lỗi: Không có collection ID. Hãy set POSTMAN_COLLECTION_ID trong file .env"
+                )
             
-            # Tạo environment với biến URL
-            env_id = None
-            env_name = args.get("environment_name") or f"{resource_name.title()} Environment"
+            # Tạo environment
+            env_id = self.env_manager.create_resource_environment(
+                resource_name, 
+                base_url, 
+                args.get("environment_variables")
+            )
             
-            # Tạo environment variables với base_url đầy đủ (bao gồm protocol)
-            env_variables = {
-                "base_url": base_url,  # Chứa cả protocol và domain (ví dụ: https://jsonplaceholder.typicode.com)
-                "resource_name": resource_name,
-                "api_key": "your_api_key_here",
-                "timeout": "30"
-            }
-            
-            # Merge với environment variables được chỉ định
-            if args.get("environment_variables"):
-                env_variables.update(args["environment_variables"])
-            
-            try:
-                # Tạo environment mới
-                env_result = self.postman_client.create_environment(env_name, env_variables)
-                if env_result and 'environment' in env_result:
-                    env_id = env_result["environment"]["id"]
-                    print(f"✅ Đã tạo environment: {env_name} (ID: {env_id})")
-                else:
-                    print(f"⚠️  Không thể tạo environment: {env_result}")
-                    # Sử dụng environment có sẵn nếu có
-                    if self.default_environment_id:
-                        env_id = self.default_environment_id
-                        print(f"⚠️  Sử dụng environment mặc định: {env_id}")
-            except Exception as e:
-                print(f"⚠️  Lỗi tạo environment: {str(e)}")
-                # Sử dụng environment có sẵn nếu có
-                if self.default_environment_id:
-                    env_id = self.default_environment_id
-                    print(f"⚠️  Sử dụng environment mặc định: {env_id}")
-            
-            # Tạo CRUD operations với biến URL đúng format
+            # Tạo CRUD operations
             crud_requests = []
+            crud_configs = [
+                ("GET", f"Get {resource_name.title()} List", f"{{{{base_url}}}}/{resource_name}", 200, None),
+                ("GET", f"Get {resource_name.title()} by ID", f"{{{{base_url}}}}/{resource_name}/{{{{id}}}}", 200, None),
+                ("POST", f"Create {resource_name.title()}", f"{{{{base_url}}}}/{resource_name}", 201, {"name": "Example", "description": "Example description"}),
+                ("PUT", f"Update {resource_name.title()}", f"{{{{base_url}}}}/{resource_name}/{{{{id}}}}", 200, {"name": "Updated Example", "description": "Updated description"}),
+                ("DELETE", f"Delete {resource_name.title()}", f"{{{{base_url}}}}/{resource_name}/{{{{id}}}}", 200, None)
+            ]
             
-            # 1. GET - Lấy danh sách (Read)
-            get_list_result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=f"Get {resource_name.title()} List",
-                method="GET",
-                url=f"{{{{base_url}}}}/{resource_name}",  # Sử dụng biến base_url đầy đủ
-                headers=headers,
-                expected_status=200
-            )
-            if get_list_result:
-                crud_requests.append(f"✅ GET {resource_name.title()} List")
+            for method, name, url, expected_status, body in crud_configs:
+                result = self.postman_client.add_request_to_collection(
+                    collection_id=collection_id,
+                    name=name,
+                    method=method,
+                    url=url,
+                    headers=headers,
+                    body=body,
+                    expected_status=expected_status
+                )
+                if result:
+                    crud_requests.append(f"✅ {method} {name}")
             
-            # 2. GET - Lấy theo ID (Read)
-            get_by_id_result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=f"Get {resource_name.title()} by ID",
-                method="GET",
-                url=f"{{{{base_url}}}}/{resource_name}/{{{{id}}}}",  # Sử dụng biến base_url đầy đủ + id
-                headers=headers,
-                expected_status=200
-            )
-            if get_by_id_result:
-                crud_requests.append(f"✅ GET {resource_name.title()} by ID")
-            
-            # 3. POST - Tạo mới (Create)
-            post_result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=f"Create {resource_name.title()}",
-                method="POST",
-                url=f"{{{{base_url}}}}/{resource_name}",  # Sử dụng biến base_url đầy đủ
-                headers=headers,
-                body={"name": "Example", "description": "Example description"},
-                expected_status=201
-            )
-            if post_result:
-                crud_requests.append(f"✅ POST Create {resource_name.title()}")
-            
-            # 4. PUT - Cập nhật (Update)
-            put_result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=f"Update {resource_name.title()}",
-                method="PUT",
-                url=f"{{{{base_url}}}}/{resource_name}/{{{{id}}}}",  # Sử dụng biến base_url đầy đủ + id
-                headers=headers,
-                body={"name": "Updated Example", "description": "Updated description"},
-                expected_status=200
-            )
-            if put_result:
-                crud_requests.append(f"✅ PUT Update {resource_name.title()}")
-            
-            # 5. DELETE - Xóa (Delete)
-            delete_result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=f"Delete {resource_name.title()}",
-                method="DELETE",
-                url=f"{{{{base_url}}}}/{resource_name}/{{{{id}}}}",  # Sử dụng biến base_url đầy đủ + id
-                headers=headers,
-                expected_status=200
-            )
-            if delete_result:
-                crud_requests.append(f"✅ DELETE {resource_name.title()}")
-            
-            response_text = f"""
+            content = f"""
 🎯 CRUD Operations đã được tạo thành công cho resource: {resource_name.title()}
 
 📋 Các requests đã tạo:
@@ -364,503 +486,32 @@ class SimplePostmanMCPServer:
 📝 Ví dụ URL: {{base_url}}/users = {base_url}/users
 """
             
-            return {
-                "success": True,
-                "content": response_text,
-                "data": {
-                    "resource_name": resource_name,
-                    "base_url": base_url,
-                    "collection_id": collection_id,
-                    "environment_id": env_id,
-                    "crud_requests": crud_requests,
-                    "environment_variables": env_variables
-                }
-            }
+            return self.response_formatter.success_response(content, {
+                "resource_name": resource_name,
+                "base_url": base_url,
+                "collection_id": collection_id,
+                "environment_id": env_id,
+                "crud_requests": crud_requests
+            })
             
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi tạo CRUD operations: {str(e)}"
-            }
+            return self.response_formatter.error_response(str(e), f"❌ Lỗi khi tạo CRUD operations: {str(e)}")
     
     def create_get_request(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo GET request (Read)"""
-        try:
-            collection_id = args.get("collection_id") or self.default_collection_id
-            expected_status = args.get("expected_status", 200)
-            
-            if not collection_id:
-                return {
-                    "success": False,
-                    "error": "Không có collection ID",
-                    "content": "❌ Lỗi: Không có collection ID"
-                }
-            
-            # Tạo environment với biến URL nếu chưa có
-            env_id = self.default_environment_id
-            if not env_id:
-                try:
-                    # Tách protocol và domain từ URL
-                    url = args["url"]
-                    if url.startswith("http://"):
-                        protocol = "http://"
-                        domain = url[7:]  # Bỏ "http://"
-                    elif url.startswith("https://"):
-                        protocol = "https://"
-                        domain = url[8:]  # Bỏ "https://"
-                    else:
-                        protocol = "https://"  # Mặc định là https
-                        domain = url
-                    
-                    # Tách path từ domain
-                    if "/" in domain:
-                        domain_parts = domain.split("/", 1)
-                        base_domain = domain_parts[0]
-                        path = domain_parts[1]
-                    else:
-                        base_domain = domain
-                        path = ""
-                    
-                    env_variables = {
-                        "base_url": base_domain,  # Chỉ chứa domain
-                        "protocol": protocol,  # Protocol riêng biệt
-                        "api_key": "your_api_key_here",
-                        "timeout": "30"
-                    }
-                    
-                    env_result = self.postman_client.create_environment("Default Environment", env_variables)
-                    if env_result and 'environment' in env_result:
-                        env_id = env_result["environment"]["id"]
-                        print(f"✅ Đã tạo environment mới: Default Environment (ID: {env_id})")
-                except Exception as e:
-                    print(f"⚠️  Không thể tạo environment: {str(e)}")
-            
-            # Sử dụng biến URL nếu có thể
-            url = args["url"]
-            if env_id:
-                # Thay thế base_url bằng biến
-                if url.startswith("http://"):
-                    protocol = "http://"
-                    domain = url[7:]
-                elif url.startswith("https://"):
-                    protocol = "https://"
-                    domain = url[8:]
-                else:
-                    protocol = "https://"
-                    domain = url
-                
-                if "/" in domain:
-                    domain_parts = domain.split("/", 1)
-                    base_domain = domain_parts[0]
-                    path = domain_parts[1]
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}/{path}"
-                else:
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}"
-            
-            result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=args["name"],
-                method="GET",
-                url=url,
-                headers=args.get("headers", {"Content-Type": "application/json"}),
-                expected_status=expected_status
-            )
-            
-            if result:
-                response_text = f"""
-✅ GET Request đã được tạo thành công!
-
-📋 Thông tin:
-- Tên: {args['name']}
-- Method: GET
-- URL: {url}
-- Expected Status: {expected_status}
-- Collection ID: {collection_id}
-- Environment ID: {env_id if env_id else 'Không có'}
-
-🔗 Collection URL: https://go.postman.co/collection/{collection_id}
-🔗 Environment URL: https://go.postman.co/environment/{env_id if env_id else 'N/A'}
-
-💡 Biến URL: {{{{protocol}}}}{{{{base_url}}}} = {protocol if env_id else 'N/A'}{base_domain if env_id else 'N/A'}
-"""
-                return {
-                    "success": True,
-                    "content": response_text,
-                    "data": {"result": result, "environment_id": env_id}
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": "Không thể tạo GET request",
-                    "content": "❌ Lỗi: Không thể tạo GET request"
-                }
-                
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi tạo GET request: {str(e)}"
-            }
+        return self._create_request_with_environment("GET", args)
     
     def create_post_request(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo POST request (Create)"""
-        try:
-            collection_id = args.get("collection_id") or self.default_collection_id
-            expected_status = args.get("expected_status", 201)
-            
-            if not collection_id:
-                return {
-                    "success": False,
-                    "error": "Không có collection ID",
-                    "content": "❌ Lỗi: Không có collection ID"
-                }
-            
-            # Tạo environment với biến URL nếu chưa có
-            env_id = self.default_environment_id
-            if not env_id:
-                try:
-                    # Tách protocol và domain từ URL
-                    url = args["url"]
-                    if url.startswith("http://"):
-                        protocol = "http://"
-                        domain = url[7:]  # Bỏ "http://"
-                    elif url.startswith("https://"):
-                        protocol = "https://"
-                        domain = url[8:]  # Bỏ "https://"
-                    else:
-                        protocol = "https://"  # Mặc định là https
-                        domain = url
-                    
-                    # Tách path từ domain
-                    if "/" in domain:
-                        domain_parts = domain.split("/", 1)
-                        base_domain = domain_parts[0]
-                        path = domain_parts[1]
-                    else:
-                        base_domain = domain
-                        path = ""
-                    
-                    env_variables = {
-                        "base_url": base_domain,  # Chỉ chứa domain
-                        "protocol": protocol,  # Protocol riêng biệt
-                        "api_key": "your_api_key_here",
-                        "timeout": "30"
-                    }
-                    
-                    env_result = self.postman_client.create_environment("Default Environment", env_variables)
-                    if env_result and 'environment' in env_result:
-                        env_id = env_result["environment"]["id"]
-                        print(f"✅ Đã tạo environment mới: Default Environment (ID: {env_id})")
-                except Exception as e:
-                    print(f"⚠️  Không thể tạo environment: {str(e)}")
-            
-            # Sử dụng biến URL nếu có thể
-            url = args["url"]
-            if env_id:
-                # Thay thế base_url bằng biến
-                if url.startswith("http://"):
-                    protocol = "http://"
-                    domain = url[7:]
-                elif url.startswith("https://"):
-                    protocol = "https://"
-                    domain = url[8:]
-                else:
-                    protocol = "https://"
-                    domain = url
-                
-                if "/" in domain:
-                    domain_parts = domain.split("/", 1)
-                    base_domain = domain_parts[0]
-                    path = domain_parts[1]
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}/{path}"
-                else:
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}"
-            
-            result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=args["name"],
-                method="POST",
-                url=url,
-                headers=args.get("headers", {"Content-Type": "application/json"}),
-                body=args.get("body", {}),
-                expected_status=expected_status
-            )
-            
-            if result:
-                response_text = f"""
-✅ POST Request đã được tạo thành công!
-
-📋 Thông tin:
-- Tên: {args['name']}
-- Method: POST
-- URL: {url}
-- Expected Status: {expected_status}
-- Collection ID: {collection_id}
-- Environment ID: {env_id if env_id else 'Không có'}
-
-🔗 Collection URL: https://go.postman.co/collection/{collection_id}
-🔗 Environment URL: https://go.postman.co/environment/{env_id if env_id else 'N/A'}
-
-💡 Biến URL: {{{{protocol}}}}{{{{base_url}}}} = {protocol if env_id else 'N/A'}{base_domain if env_id else 'N/A'}
-"""
-                return {
-                    "success": True,
-                    "content": response_text,
-                    "data": {"result": result, "environment_id": env_id}
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": "Không thể tạo POST request",
-                    "content": "❌ Lỗi: Không thể tạo POST request"
-                }
-                
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi tạo POST request: {str(e)}"
-            }
+        return self._create_request_with_environment("POST", args)
     
     def create_put_request(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo PUT request (Update)"""
-        try:
-            collection_id = args.get("collection_id") or self.default_collection_id
-            expected_status = args.get("expected_status", 200)
-            
-            if not collection_id:
-                return {
-                    "success": False,
-                    "error": "Không có collection ID",
-                    "content": "❌ Lỗi: Không có collection ID"
-                }
-            
-            # Tạo environment với biến URL nếu chưa có
-            env_id = self.default_environment_id
-            if not env_id:
-                try:
-                    # Tách protocol và domain từ URL
-                    url = args["url"]
-                    if url.startswith("http://"):
-                        protocol = "http://"
-                        domain = url[7:]  # Bỏ "http://"
-                    elif url.startswith("https://"):
-                        protocol = "https://"
-                        domain = url[8:]  # Bỏ "https://"
-                    else:
-                        protocol = "https://"  # Mặc định là https
-                        domain = url
-                    
-                    # Tách path từ domain
-                    if "/" in domain:
-                        domain_parts = domain.split("/", 1)
-                        base_domain = domain_parts[0]
-                        path = domain_parts[1]
-                    else:
-                        base_domain = domain
-                        path = ""
-                    
-                    env_variables = {
-                        "base_url": base_domain,  # Chỉ chứa domain
-                        "protocol": protocol,  # Protocol riêng biệt
-                        "api_key": "your_api_key_here",
-                        "timeout": "30"
-                    }
-                    
-                    env_result = self.postman_client.create_environment("Default Environment", env_variables)
-                    if env_result and 'environment' in env_result:
-                        env_id = env_result["environment"]["id"]
-                        print(f"✅ Đã tạo environment mới: Default Environment (ID: {env_id})")
-                except Exception as e:
-                    print(f"⚠️  Không thể tạo environment: {str(e)}")
-            
-            # Sử dụng biến URL nếu có thể
-            url = args["url"]
-            if env_id:
-                # Thay thế base_url bằng biến
-                if url.startswith("http://"):
-                    protocol = "http://"
-                    domain = url[7:]
-                elif url.startswith("https://"):
-                    protocol = "https://"
-                    domain = url[8:]
-                else:
-                    protocol = "https://"
-                    domain = url
-                
-                if "/" in domain:
-                    domain_parts = domain.split("/", 1)
-                    base_domain = domain_parts[0]
-                    path = domain_parts[1]
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}/{path}"
-                else:
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}"
-            
-            result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=args["name"],
-                method="PUT",
-                url=url,
-                headers=args.get("headers", {"Content-Type": "application/json"}),
-                body=args.get("body", {}),
-                expected_status=expected_status
-            )
-            
-            if result:
-                response_text = f"""
-✅ PUT Request đã được tạo thành công!
-
-📋 Thông tin:
-- Tên: {args['name']}
-- Method: PUT
-- URL: {url}
-- Expected Status: {expected_status}
-- Collection ID: {collection_id}
-- Environment ID: {env_id if env_id else 'Không có'}
-
-🔗 Collection URL: https://go.postman.co/collection/{collection_id}
-🔗 Environment URL: https://go.postman.co/environment/{env_id if env_id else 'N/A'}
-
-💡 Biến URL: {{{{protocol}}}}{{{{base_url}}}} = {protocol if env_id else 'N/A'}{base_domain if env_id else 'N/A'}
-"""
-                return {
-                    "success": True,
-                    "content": response_text,
-                    "data": {"result": result, "environment_id": env_id}
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": "Không thể tạo PUT request",
-                    "content": "❌ Lỗi: Không thể tạo PUT request"
-                }
-                
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi tạo PUT request: {str(e)}"
-            }
+        return self._create_request_with_environment("PUT", args)
     
     def create_delete_request(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo DELETE request (Delete)"""
-        try:
-            collection_id = args.get("collection_id") or self.default_collection_id
-            expected_status = args.get("expected_status", 200)
-            
-            if not collection_id:
-                return {
-                    "success": False,
-                    "error": "Không có collection ID",
-                    "content": "❌ Lỗi: Không có collection ID"
-                }
-            
-            # Tạo environment với biến URL nếu chưa có
-            env_id = self.default_environment_id
-            if not env_id:
-                try:
-                    # Tách protocol và domain từ URL
-                    url = args["url"]
-                    if url.startswith("http://"):
-                        protocol = "http://"
-                        domain = url[7:]  # Bỏ "http://"
-                    elif url.startswith("https://"):
-                        protocol = "https://"
-                        domain = url[8:]  # Bỏ "https://"
-                    else:
-                        protocol = "https://"  # Mặc định là https
-                        domain = url
-                    
-                    # Tách path từ domain
-                    if "/" in domain:
-                        domain_parts = domain.split("/", 1)
-                        base_domain = domain_parts[0]
-                        path = domain_parts[1]
-                    else:
-                        base_domain = domain
-                        path = ""
-                    
-                    env_variables = {
-                        "base_url": base_domain,  # Chỉ chứa domain
-                        "protocol": protocol,  # Protocol riêng biệt
-                        "api_key": "your_api_key_here",
-                        "timeout": "30"
-                    }
-                    
-                    env_result = self.postman_client.create_environment("Default Environment", env_variables)
-                    if env_result and 'environment' in env_result:
-                        env_id = env_result["environment"]["id"]
-                        print(f"✅ Đã tạo environment mới: Default Environment (ID: {env_id})")
-                except Exception as e:
-                    print(f"⚠️  Không thể tạo environment: {str(e)}")
-            
-            # Sử dụng biến URL nếu có thể
-            url = args["url"]
-            if env_id:
-                # Thay thế base_url bằng biến
-                if url.startswith("http://"):
-                    protocol = "http://"
-                    domain = url[7:]
-                elif url.startswith("https://"):
-                    protocol = "https://"
-                    domain = url[8:]
-                else:
-                    protocol = "https://"
-                    domain = url
-                
-                if "/" in domain:
-                    domain_parts = domain.split("/", 1)
-                    base_domain = domain_parts[0]
-                    path = domain_parts[1]
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}/{path}"
-                else:
-                    url = f"{{{{protocol}}}}{{{{base_url}}}}"
-            
-            result = self.postman_client.add_request_to_collection(
-                collection_id=collection_id,
-                name=args["name"],
-                method="DELETE",
-                url=url,
-                headers=args.get("headers", {"Content-Type": "application/json"}),
-                expected_status=expected_status
-            )
-            
-            if result:
-                response_text = f"""
-✅ DELETE Request đã được tạo thành công!
-
-📋 Thông tin:
-- Tên: {args['name']}
-- Method: DELETE
-- URL: {url}
-- Expected Status: {expected_status}
-- Collection ID: {collection_id}
-- Environment ID: {env_id if env_id else 'Không có'}
-
-🔗 Collection URL: https://go.postman.co/collection/{collection_id}
-🔗 Environment URL: https://go.postman.co/environment/{env_id if env_id else 'N/A'}
-
-💡 Biến URL: {{{{protocol}}}}{{{{base_url}}}} = {protocol if env_id else 'N/A'}{base_domain if env_id else 'N/A'}
-"""
-                return {
-                    "success": True,
-                    "content": response_text,
-                    "data": {"result": result, "environment_id": env_id}
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": "Không thể tạo DELETE request",
-                    "content": "❌ Lỗi: Không thể tạo DELETE request"
-                }
-                
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi tạo DELETE request: {str(e)}"
-            }
+        return self._create_request_with_environment("DELETE", args)
     
     def list_collections(self) -> Dict[str, Any]:
         """Lấy danh sách collections"""
@@ -868,30 +519,19 @@ class SimplePostmanMCPServer:
             collections = self.postman_client.get_collections()
             
             if not collections["collections"]:
-                return {
-                    "success": True,
-                    "content": "📭 Không có collections nào trong Postman"
-                }
+                return self.response_formatter.success_response("📭 Không có collections nào trong Postman")
             
-            response_text = "📚 Danh sách Collections:\n\n"
+            content = "📚 Danh sách Collections:\n\n"
             for collection in collections["collections"]:
-                response_text += f"• {collection['name']} (ID: {collection['id']})\n"
+                content += f"• {collection['name']} (ID: {collection['id']})\n"
                 if collection.get('description'):
-                    response_text += f"  📝 {collection['description']}\n"
-                response_text += "\n"
+                    content += f"  📝 {collection['description']}\n"
+                content += "\n"
             
-            return {
-                "success": True,
-                "content": response_text,
-                "data": collections
-            }
+            return self.response_formatter.success_response(content, collections)
             
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi lấy danh sách collections: {str(e)}"
-            }
+            return self.response_formatter.error_response(str(e), f"❌ Lỗi khi lấy danh sách collections: {str(e)}")
     
     def list_environments(self) -> Dict[str, Any]:
         """Lấy danh sách environments"""
@@ -899,30 +539,19 @@ class SimplePostmanMCPServer:
             environments = self.postman_client.get_environments()
             
             if not environments["environments"]:
-                return {
-                    "success": True,
-                    "content": "🌍 Không có environments nào trong Postman"
-                }
+                return self.response_formatter.success_response("🌍 Không có environments nào trong Postman")
             
-            response_text = "🌍 Danh sách Environments:\n\n"
+            content = "🌍 Danh sách Environments:\n\n"
             for env in environments["environments"]:
-                response_text += f"• {env['name']} (ID: {env['id']})\n"
+                content += f"• {env['name']} (ID: {env['id']})\n"
                 if env.get('description'):
-                    response_text += f"  📝 {env['description']}\n"
-                response_text += "\n"
+                    content += f"  📝 {env['description']}\n"
+                content += "\n"
             
-            return {
-                "success": True,
-                "content": response_text,
-                "data": environments
-            }
+            return self.response_formatter.success_response(content, environments)
             
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi lấy danh sách environments: {str(e)}"
-            }
+            return self.response_formatter.error_response(str(e), f"❌ Lỗi khi lấy danh sách environments: {str(e)}")
     
     def create_environment(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo environment mới"""
@@ -932,7 +561,7 @@ class SimplePostmanMCPServer:
                 args["variables"]
             )
             
-            response_text = f"""
+            content = f"""
 ✅ Environment đã được tạo thành công!
 
 🌍 Thông tin:
@@ -943,45 +572,29 @@ class SimplePostmanMCPServer:
 🔗 Environment URL: https://go.postman.co/environment/{result['environment']['id']}
 """
             
-            return {
-                "success": True,
-                "content": response_text,
-                "data": result
-            }
+            return self.response_formatter.success_response(content, result)
             
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "content": f"❌ Lỗi khi tạo environment: {str(e)}"
-            }
+            return self.response_formatter.error_response(str(e), f"❌ Lỗi khi tạo environment: {str(e)}")
     
     def call_tool(self, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Gọi tool theo tên"""
-        if name == "create_api_request":
-            return self.create_api_request(arguments)
-        elif name == "create_crud_operations":
-            return self.create_crud_operations(arguments)
-        elif name == "create_get_request":
-            return self.create_get_request(arguments)
-        elif name == "create_post_request":
-            return self.create_post_request(arguments)
-        elif name == "create_put_request":
-            return self.create_put_request(arguments)
-        elif name == "create_delete_request":
-            return self.create_delete_request(arguments)
-        elif name == "list_collections":
-            return self.list_collections()
-        elif name == "list_environments":
-            return self.list_environments()
-        elif name == "create_environment":
-            return self.create_environment(arguments)
+        tool_methods = {
+            "create_api_request": self.create_api_request,
+            "create_crud_operations": self.create_crud_operations,
+            "create_get_request": self.create_get_request,
+            "create_post_request": self.create_post_request,
+            "create_put_request": self.create_put_request,
+            "create_delete_request": self.create_delete_request,
+            "list_collections": self.list_collections,
+            "list_environments": self.list_environments,
+            "create_environment": self.create_environment
+        }
+        
+        if name in tool_methods:
+            return tool_methods[name](arguments)
         else:
-            return {
-                "success": False,
-                "error": f"Unknown tool: {name}",
-                "content": f"❌ Tool không tồn tại: {name}"
-            }
+            return self.response_formatter.error_response(f"Unknown tool: {name}", f"❌ Tool không tồn tại: {name}")
 
 def main():
     """Main function để chạy server"""
